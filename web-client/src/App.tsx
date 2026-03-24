@@ -1,6 +1,13 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Polynomial5 } from './core/Polynomial5';
+
+interface CamPoint {
+  theta: number;
+  s: number;
+  v: number;
+  a: number;
+  j: number;
+}
 
 function App() {
   // 1. State for Inputs
@@ -9,25 +16,72 @@ function App() {
   const [slaveStart, setSlaveStart] = useState<number>(0);
   const [slaveEnd, setSlaveEnd] = useState<number>(100);
   const [resolution, setResolution] = useState<number>(100);
+  
+  // 2. State for Data
+  const [data, setData] = useState<CamPoint[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // 2. Compute Data (Reactive)
-  const data = useMemo(() => {
-    // Basic Validation
-    if (masterEnd <= masterStart) return [];
+  // 3. Fetch Data from Python Backend
+  useEffect(() => {
+    const fetchData = async () => {
+      // Basic Validation
+      if (masterEnd <= masterStart) {
+        setData([]);
+        return;
+      }
 
-    const poly = new Polynomial5(masterStart, masterEnd, slaveStart, slaveEnd);
-    return poly.generateTable(resolution).map(p => ({
-      ...p,
-      // Round for display cleanliness
-      s: parseFloat(p.s.toFixed(4)),
-      v: parseFloat(p.v.toFixed(4)),
-      a: parseFloat(p.a.toFixed(4)),
-      j: parseFloat(p.j.toFixed(4)),
-      theta: parseFloat(p.theta.toFixed(2))
-    }));
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch('http://localhost:8000/calculate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            masterStart,
+            masterEnd,
+            slaveStart,
+            slaveEnd,
+            resolution
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || 'Failed to fetch data');
+        }
+
+        const result: CamPoint[] = await response.json();
+        
+        // Process data for display (rounding)
+        const processedData = result.map(p => ({
+          ...p,
+          s: parseFloat(p.s.toFixed(4)),
+          v: parseFloat(p.v.toFixed(4)),
+          a: parseFloat(p.a.toFixed(4)),
+          j: parseFloat(p.j.toFixed(4)),
+          theta: parseFloat(p.theta.toFixed(2))
+        }));
+
+        setData(processedData);
+      } catch (err: any) {
+        console.error("Error fetching data:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Debounce the API call slightly to avoid too many requests while typing
+    const timeoutId = setTimeout(fetchData, 300);
+    return () => clearTimeout(timeoutId);
+
   }, [masterStart, masterEnd, slaveStart, slaveEnd, resolution]);
 
-  // 3. Export to CSV
+  // 4. Export to CSV
   const handleExport = () => {
     if (!data.length) return;
 
@@ -54,7 +108,7 @@ function App() {
         {/* Header */}
         <header className="border-b pb-4 mb-8">
           <h1 className="text-3xl font-bold text-indigo-600">Quintic <span className="text-gray-500 text-lg font-normal">MVP Editor</span></h1>
-          <p className="text-gray-500 mt-2">VDI 2143 Compliant Cam Profile Generator (5th Order Polynomial)</p>
+          <p className="text-gray-500 mt-2">VDI 2143 Compliant Cam Profile Generator (Powered by Python Backend)</p>
         </header>
 
         {/* Control Panel */}
@@ -110,15 +164,29 @@ function App() {
             />
           </div>
 
-          <div className="flex flex-col space-y-2">
+          <div className="flex flex-col space-y-2 md:col-span-5 lg:col-span-1">
              <button 
               onClick={handleExport}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition-colors flex items-center justify-center gap-2"
+              disabled={data.length === 0}
+              className={`font-bold py-2 px-4 rounded transition-colors flex items-center justify-center gap-2 ${data.length === 0 ? 'bg-gray-400 cursor-not-allowed text-gray-200' : 'bg-indigo-600 hover:bg-indigo-700 text-white'}`}
             >
               <span>Download CSV</span>
             </button>
           </div>
         </div>
+        
+        {/* Status / Error Message */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <strong className="font-bold">Error: </strong>
+            <span className="block sm:inline">{error}</span>
+            <span className="block text-sm mt-1">Make sure the Python backend is running on port 8000.</span>
+          </div>
+        )}
+        
+        {loading && (
+           <div className="text-center text-gray-500 py-2">Calculating...</div>
+        )}
 
         {/* Charts Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -142,7 +210,7 @@ function App() {
   )
 }
 
-// Reusable Chart Component
+// Reusable Chart Component (unchanged)
 const ChartCard = ({ title, color, dataKey, data, unit }: { title: string, color: string, dataKey: string, data: any[], unit: string }) => (
   <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 h-80 flex flex-col">
     <h3 className="text-md font-semibold text-gray-700 mb-4 flex justify-between">
