@@ -1,5 +1,10 @@
+import sys
+import os
 import pytest
 import numpy as np
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from core.solver import CamKernel
 
 def test_solve_quintic():
