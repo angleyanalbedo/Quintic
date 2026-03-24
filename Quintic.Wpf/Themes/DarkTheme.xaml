@@ -7,12 +7,13 @@
     <Color x:Key="Color.Success">#2ECC71</Color>
     <Color x:Key="Color.Warning">#E67E22</Color>
     <Color x:Key="Color.PlotBackground">#111111</Color>
-    <Color x:Key="Color.PlotLine">#CCCCCC</Color>
-    <Color x:Key="Color.PlotLineHighlight">#3498DB</Color>
-    <Color x:Key="Color.Text.Primary">#FFFFFF</Color>
-    <Color x:Key="Color.Text.Secondary">#BBBBBB</Color>
-    <Color x:Key="Color.Control.Background">#2D2D30</Color>
+    <Color x:Key="Color.PlotLine">#333333</Color> <!-- 更淡的网格线 -->
+    <Color x:Key="Color.Text.Primary">#F0F0F0</Color>
+    <Color x:Key="Color.Text.Secondary">#AAAAAA</Color>
+    <Color x:Key="Color.Control.Background">#252526</Color>
     <Color x:Key="Color.Control.Border">#3E3E42</Color>
+    <Color x:Key="Color.Control.MouseOver">#3E3E40</Color>
+    <Color x:Key="Color.Control.Selected">#007ACC</Color>
 
     <!-- Brushes -->
     <SolidColorBrush x:Key="Brush.Background" Color="{StaticResource Color.Background}"/>
@@ -21,27 +22,152 @@
     <SolidColorBrush x:Key="Brush.Warning" Color="{StaticResource Color.Warning}"/>
     <SolidColorBrush x:Key="Brush.PlotBackground" Color="{StaticResource Color.PlotBackground}"/>
     <SolidColorBrush x:Key="Brush.PlotLine" Color="{StaticResource Color.PlotLine}"/>
-    <SolidColorBrush x:Key="Brush.PlotLineHighlight" Color="{StaticResource Color.PlotLineHighlight}"/>
     <SolidColorBrush x:Key="Brush.Text.Primary" Color="{StaticResource Color.Text.Primary}"/>
     <SolidColorBrush x:Key="Brush.Text.Secondary" Color="{StaticResource Color.Text.Secondary}"/>
     <SolidColorBrush x:Key="Brush.Control.Background" Color="{StaticResource Color.Control.Background}"/>
     <SolidColorBrush x:Key="Brush.Control.Border" Color="{StaticResource Color.Control.Border}"/>
+    <SolidColorBrush x:Key="Brush.Control.MouseOver" Color="{StaticResource Color.Control.MouseOver}"/>
+    <SolidColorBrush x:Key="Brush.Control.Selected" Color="{StaticResource Color.Control.Selected}"/>
 
-    <!-- Base Styles for Common Controls -->
-    <Style TargetType="GridSplitter">
-        <Setter Property="Background" Value="{StaticResource Brush.Control.Border}"/>
-        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    <!-- DataGridColumnHeader Style (扁平化表头) -->
+    <Style TargetType="DataGridColumnHeader">
+        <Setter Property="Background" Value="#2D2D30"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Secondary}"/>
+        <Setter Property="Padding" Value="10,5"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Control.Border}"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridColumnHeader">
+                    <Grid>
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
+    <!-- DataGridCell Style (高亮选中) -->
+    <Style TargetType="DataGridCell">
+        <Setter Property="Padding" Value="5"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridCell">
+                    <Border Background="{TemplateBinding Background}" 
+                            BorderBrush="{TemplateBinding BorderBrush}" 
+                            BorderThickness="0" 
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{StaticResource Brush.Control.Selected}"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="BorderBrush" Value="Transparent"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- DataGridRow Style (交替行与悬停) -->
+    <Style TargetType="DataGridRow">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="SnapsToDevicePixels" Value="true"/>
+        <Setter Property="Validation.ErrorTemplate" Value="{x:Null}"/>
+        <Setter Property="ValidationErrorTemplate">
+            <Setter.Value>
+                <ControlTemplate>
+                    <TextBlock Foreground="Red" Margin="2,0,0,0" Text="!" VerticalAlignment="Center"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource Brush.Control.MouseOver}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- DataGrid Main Style -->
     <Style TargetType="DataGrid">
         <Setter Property="Background" Value="{StaticResource Brush.Control.Background}"/>
         <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
         <Setter Property="RowBackground" Value="{StaticResource Brush.Control.Background}"/>
-        <Setter Property="AlternatingRowBackground" Value="#333337"/>
-        <Setter Property="GridLinesVisibility" Value="None"/>
+        <Setter Property="AlternatingRowBackground" Value="#2A2A2C"/> <!-- 极淡的交替色 -->
+        <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+        <Setter Property="HorizontalGridLinesBrush" Value="#333333"/>
+        <Setter Property="VerticalGridLinesBrush" Value="Transparent"/>
         <Setter Property="HeadersVisibility" Value="Column"/>
         <Setter Property="BorderBrush" Value="{StaticResource Brush.Control.Border}"/>
         <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="RowHeaderWidth" Value="0"/>
+        <Setter Property="AutoGenerateColumns" Value="False"/>
+        <Setter Property="CanUserAddRows" Value="True"/>
+        <Setter Property="CanUserDeleteRows" Value="True"/>
+        <Setter Property="SelectionMode" Value="Single"/>
+        <Setter Property="SelectionUnit" Value="FullRow"/>
+    </Style>
+
+    <!-- GridSplitter Style (更明显的把手) -->
+    <Style TargetType="GridSplitter">
+        <Setter Property="Background" Value="#3E3E42"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="GridSplitter">
+                    <Border Background="{TemplateBinding Background}" BorderThickness="0">
+                        <Path Data="M0,0 L10,0 M0,3 L10,3" Stroke="#666666" StrokeThickness="1" 
+                              HorizontalAlignment="Center" VerticalAlignment="Center" Width="10" Height="4"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ScrollBar Style (极简深色) -->
+    <Style TargetType="ScrollBar">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="#555555"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Width" Value="10"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ScrollBar">
+                    <Grid x:Name="GridRoot" Width="10" Background="{TemplateBinding Background}">
+                        <Track x:Name="PART_Track" IsDirectionReversed="true" Focusable="false">
+                            <Track.Thumb>
+                                <Thumb>
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Border Background="#444444" CornerRadius="4" Margin="2"/>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ComboBox Style (用于 DataGridComboBoxColumn 编辑时) -->
+    <Style TargetType="ComboBox">
+        <Setter Property="Background" Value="{StaticResource Brush.Control.Background}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Control.Border}"/>
     </Style>
 
 </ResourceDictionary>

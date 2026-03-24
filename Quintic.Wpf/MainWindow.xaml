@@ -7,74 +7,106 @@
         xmlns:vm="clr-namespace:Quintic.Wpf.ViewModels"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="Quintic - Advanced Cam Editor" Height="800" Width="1200"
+        Title="Quintic - Advanced Cam Editor" Height="900" Width="1400"
         Background="{StaticResource Brush.Background}"
-        Foreground="{StaticResource Brush.Text.Primary}">
+        Foreground="{StaticResource Brush.Text.Primary}"
+        WindowStartupLocation="CenterScreen">
 
     <Window.DataContext>
         <vm:MainViewModel/>
     </Window.DataContext>
 
-    <Grid Margin="10">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="1*" /> <!-- Data Grid Area (Top) -->
-            <RowDefinition Height="Auto" />  <!-- Splitter -->
-            <RowDefinition Height="2*" /> <!-- S Curve (Middle) -->
-            <RowDefinition Height="Auto" />  <!-- Splitter -->
-            <RowDefinition Height="1*" /> <!-- V/A Curve (Bottom) -->
+            <RowDefinition Height="Auto"/> <!-- Top Bar (Optional) -->
+            <RowDefinition Height="*"/>    <!-- Main Content -->
         </Grid.RowDefinitions>
 
-        <!-- Area A: Data Grid -->
-        <Border Grid.Row="0" BorderBrush="{StaticResource Brush.Control.Border}" BorderThickness="1" Background="{StaticResource Brush.Control.Background}">
-            <DockPanel>
-                <TextBlock Text="Segment Table" DockPanel.Dock="Top" Padding="5" FontWeight="Bold" Background="{StaticResource Brush.Control.Border}"/>
-                <DataGrid ItemsSource="{Binding Segments}" AutoGenerateColumns="False" 
-                          CanUserAddRows="True" CanUserDeleteRows="True"
-                          Background="Transparent" RowBackground="Transparent" 
-                          Foreground="{StaticResource Brush.Text.Primary}"
-                          BorderThickness="0" GridLinesVisibility="None" HeadersVisibility="Column">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Master Start" Binding="{Binding MasterStart}" Width="*"/>
-                        <DataGridTextColumn Header="Master End" Binding="{Binding MasterEnd}" Width="*"/>
-                        <DataGridTextColumn Header="Slave Start" Binding="{Binding SlaveStart}" Width="*"/>
-                        <DataGridTextColumn Header="Slave End" Binding="{Binding SlaveEnd}" Width="*"/>
-                        <DataGridComboBoxColumn Header="Motion Law" Width="1.5*">
-                            <DataGridComboBoxColumn.ItemsSource>
-                                <x:Array Type="{x:Type system:String}">
-                                    <system:String>Dwell</system:String>
-                                    <system:String>Constant Velocity</system:String>
-                                    <system:String>Quintic</system:String>
-                                    <system:String>Modified Sine</system:String>
-                                    <system:String>Trapezoidal</system:String>
-                                </x:Array>
-                            </DataGridComboBoxColumn.ItemsSource>
-                        </DataGridComboBoxColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </DockPanel>
-        </Border>
+        <!-- Main Content Area -->
+        <Grid Grid.Row="1" Margin="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1.2*" MinHeight="150" /> <!-- Data Grid Area (Top) -->
+                <RowDefinition Height="Auto" />    <!-- Splitter -->
+                <RowDefinition Height="3*" MinHeight="200" />    <!-- S Curve (Middle) -->
+                <RowDefinition Height="Auto" />    <!-- Splitter -->
+                <RowDefinition Height="1.5*" MinHeight="100" />  <!-- V/A Curve (Bottom) -->
+            </Grid.RowDefinitions>
 
-        <!-- Splitter 1 -->
-        <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" Background="{StaticResource Brush.Control.Border}" ShowsPreview="True"/>
+            <!-- Area A: Data Grid -->
+            <!-- 移除硬边框，使用更微妙的背景区分 -->
+            <Border Grid.Row="0" Background="{StaticResource Brush.Control.Background}" CornerRadius="2" Padding="0">
+                <DockPanel>
+                    <!-- Header Strip -->
+                    <Border DockPanel.Dock="Top" Background="{StaticResource Brush.Control.Border}" Padding="10,4" CornerRadius="2,2,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="SEGMENT TABLE" FontSize="11" FontWeight="Bold" Foreground="{StaticResource Brush.Text.Secondary}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <DataGrid ItemsSource="{Binding Segments}" 
+                              AutoGenerateColumns="False" 
+                              CanUserAddRows="True" 
+                              CanUserDeleteRows="True"
+                              GridLinesVisibility="Horizontal"
+                              HeadersVisibility="Column"
+                              BorderThickness="0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Master Start (°)" Binding="{Binding MasterStart}" Width="*"/>
+                            <DataGridTextColumn Header="Master End (°)" Binding="{Binding MasterEnd}" Width="*"/>
+                            <DataGridTextColumn Header="Slave Start (mm)" Binding="{Binding SlaveStart}" Width="*"/>
+                            <DataGridTextColumn Header="Slave End (mm)" Binding="{Binding SlaveEnd}" Width="*"/>
+                            <DataGridComboBoxColumn Header="Motion Law" Width="1.5*">
+                                <DataGridComboBoxColumn.ItemsSource>
+                                    <x:Array Type="{x:Type system:String}">
+                                        <system:String>Dwell</system:String>
+                                        <system:String>Constant Velocity</system:String>
+                                        <system:String>Quintic (3-4-5)</system:String>
+                                        <system:String>Modified Sine</system:String>
+                                        <system:String>Trapezoidal</system:String>
+                                    </x:Array>
+                                </DataGridComboBoxColumn.ItemsSource>
+                            </DataGridComboBoxColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </Border>
 
-        <!-- Area B: S Curve (Displacement) -->
-        <Border Grid.Row="2" BorderBrush="{StaticResource Brush.Control.Border}" BorderThickness="1" Background="{StaticResource Brush.PlotBackground}">
-            <Grid>
-                <oxy:PlotView Model="{Binding SPlotModel}" Background="Transparent" />
-                <TextBlock Text="Displacement (S)" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10" Foreground="{StaticResource Brush.Accent}" Opacity="0.5"/>
-            </Grid>
-        </Border>
+            <!-- Splitter 1 -->
+            <GridSplitter Grid.Row="1" Height="6" HorizontalAlignment="Stretch" Background="Transparent" ShowsPreview="True" VerticalAlignment="Center"/>
 
-        <!-- Splitter 2 -->
-        <GridSplitter Grid.Row="3" Height="5" HorizontalAlignment="Stretch" Background="{StaticResource Brush.Control.Border}" ShowsPreview="True"/>
+            <!-- Area B: S Curve (Displacement) -->
+            <Border Grid.Row="2" Background="{StaticResource Brush.PlotBackground}" CornerRadius="2">
+                <Grid>
+                    <oxy:PlotView Model="{Binding SPlotModel}" Background="Transparent" />
+                    <!-- HUD Overlay -->
+                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Margin="15" Orientation="Horizontal">
+                        <Border Width="10" Height="10" Background="{StaticResource Brush.Accent}" CornerRadius="5" Margin="0,0,5,0"/>
+                        <TextBlock Text="Displacement (S)" Foreground="{StaticResource Brush.Accent}" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
 
-        <!-- Area C: V/A Curves (Derivatives) -->
-        <Border Grid.Row="4" BorderBrush="{StaticResource Brush.Control.Border}" BorderThickness="1" Background="{StaticResource Brush.PlotBackground}">
-            <Grid>
-                <oxy:PlotView Model="{Binding VAPlotModel}" Background="Transparent" />
-                <TextBlock Text="Derivatives (V/A/J)" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10" Foreground="{StaticResource Brush.Warning}" Opacity="0.5"/>
-            </Grid>
-        </Border>
+            <!-- Splitter 2 -->
+            <GridSplitter Grid.Row="3" Height="6" HorizontalAlignment="Stretch" Background="Transparent" ShowsPreview="True" VerticalAlignment="Center"/>
 
+            <!-- Area C: V/A Curves (Derivatives) -->
+            <Border Grid.Row="4" Background="{StaticResource Brush.PlotBackground}" CornerRadius="2">
+                <Grid>
+                    <oxy:PlotView Model="{Binding VAPlotModel}" Background="Transparent" />
+                    <!-- HUD Overlay -->
+                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Margin="15">
+                         <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                            <Border Width="10" Height="10" Background="{StaticResource Brush.Success}" CornerRadius="5" Margin="0,0,5,0"/>
+                            <TextBlock Text="Velocity (V)" Foreground="{StaticResource Brush.Success}" FontWeight="SemiBold"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Border Width="10" Height="10" Background="{StaticResource Brush.Warning}" CornerRadius="5" Margin="0,0,5,0"/>
+                            <TextBlock Text="Acceleration (A)" Foreground="{StaticResource Brush.Warning}" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+        </Grid>
     </Grid>
 </Window>
