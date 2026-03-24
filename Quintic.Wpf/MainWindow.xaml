@@ -1,0 +1,80 @@
+<Window x:Class="Quintic.Wpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:oxy="http://oxyplot.org/wpf"
+        xmlns:vm="clr-namespace:Quintic.Wpf.ViewModels"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d"
+        Title="Quintic - Advanced Cam Editor" Height="800" Width="1200"
+        Background="{StaticResource Brush.Background}"
+        Foreground="{StaticResource Brush.Text.Primary}">
+
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*" /> <!-- Data Grid Area (Top) -->
+            <RowDefinition Height="Auto" />  <!-- Splitter -->
+            <RowDefinition Height="2*" /> <!-- S Curve (Middle) -->
+            <RowDefinition Height="Auto" />  <!-- Splitter -->
+            <RowDefinition Height="1*" /> <!-- V/A Curve (Bottom) -->
+        </Grid.RowDefinitions>
+
+        <!-- Area A: Data Grid -->
+        <Border Grid.Row="0" BorderBrush="{StaticResource Brush.Control.Border}" BorderThickness="1" Background="{StaticResource Brush.Control.Background}">
+            <DockPanel>
+                <TextBlock Text="Segment Table" DockPanel.Dock="Top" Padding="5" FontWeight="Bold" Background="{StaticResource Brush.Control.Border}"/>
+                <DataGrid ItemsSource="{Binding Segments}" AutoGenerateColumns="False" 
+                          CanUserAddRows="True" CanUserDeleteRows="True"
+                          Background="Transparent" RowBackground="Transparent" 
+                          Foreground="{StaticResource Brush.Text.Primary}"
+                          BorderThickness="0" GridLinesVisibility="None" HeadersVisibility="Column">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Master Start" Binding="{Binding MasterStart}" Width="*"/>
+                        <DataGridTextColumn Header="Master End" Binding="{Binding MasterEnd}" Width="*"/>
+                        <DataGridTextColumn Header="Slave Start" Binding="{Binding SlaveStart}" Width="*"/>
+                        <DataGridTextColumn Header="Slave End" Binding="{Binding SlaveEnd}" Width="*"/>
+                        <DataGridComboBoxColumn Header="Motion Law" Width="1.5*">
+                            <DataGridComboBoxColumn.ItemsSource>
+                                <x:Array Type="{x:Type system:String}">
+                                    <system:String>Dwell</system:String>
+                                    <system:String>Constant Velocity</system:String>
+                                    <system:String>Quintic</system:String>
+                                    <system:String>Modified Sine</system:String>
+                                    <system:String>Trapezoidal</system:String>
+                                </x:Array>
+                            </DataGridComboBoxColumn.ItemsSource>
+                        </DataGridComboBoxColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Border>
+
+        <!-- Splitter 1 -->
+        <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" Background="{StaticResource Brush.Control.Border}" ShowsPreview="True"/>
+
+        <!-- Area B: S Curve (Displacement) -->
+        <Border Grid.Row="2" BorderBrush="{StaticResource Brush.Control.Border}" BorderThickness="1" Background="{StaticResource Brush.PlotBackground}">
+            <Grid>
+                <oxy:PlotView Model="{Binding SPlotModel}" Background="Transparent" />
+                <TextBlock Text="Displacement (S)" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10" Foreground="{StaticResource Brush.Accent}" Opacity="0.5"/>
+            </Grid>
+        </Border>
+
+        <!-- Splitter 2 -->
+        <GridSplitter Grid.Row="3" Height="5" HorizontalAlignment="Stretch" Background="{StaticResource Brush.Control.Border}" ShowsPreview="True"/>
+
+        <!-- Area C: V/A Curves (Derivatives) -->
+        <Border Grid.Row="4" BorderBrush="{StaticResource Brush.Control.Border}" BorderThickness="1" Background="{StaticResource Brush.PlotBackground}">
+            <Grid>
+                <oxy:PlotView Model="{Binding VAPlotModel}" Background="Transparent" />
+                <TextBlock Text="Derivatives (V/A/J)" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10" Foreground="{StaticResource Brush.Warning}" Opacity="0.5"/>
+            </Grid>
+        </Border>
+
+    </Grid>
+</Window>

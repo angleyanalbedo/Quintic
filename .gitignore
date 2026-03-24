@@ -2,3 +2,10 @@ quintic/api/__pycache__/
 quintic/core/__pycache__/
 quintic/services/__pycache__/
 quintic/schemas/__pycache__/
+
+# Visual Studio / .NET
+.vs/
+**/bin/
+**/obj/
+*.user
+*.suo

@@ -1,75 +1,40 @@
-# Quintic (图洛)
+# Quintic (图洛) - Industrial Cam Editor
 
-**Industrial-Grade VDI 2143 Cam Profile Generator**
+Quintic 是一款符合 **VDI 2143** 标准、基于 **C# + WPF** 开发的通用工业电子凸轮曲线设计平台。
 
-Quintic is a modern, high-performance motion design tool built for automation engineers. It implements the rigorous VDI 2143 standard for cam design, featuring a robust Python mathematical kernel and an interactive React frontend.
+本项目专为追求极致性能与用户体验的自动化工程师打造，提供数据密集型、专业深色模式 UI，对标 **Beckhoff TwinCAT 3**、**CODESYS SoftMotion** 和 **Siemens TIA Portal** 等顶级商业软件的交互体验。
 
-Unlike simple "point-to-point" editors, Quintic uses a sophisticated **Motion Compiler Architecture** that supports relative coordinates, time-based definitions, and complex motion laws.
+## 核心特性
 
----
+*   **黄金 UI 布局**：经典的“三段式”设计——数据网格、S曲线画布、V/A导数视图，完美兼顾宏观节奏与微观精度。
+*   **高性能绘图**：基于 `OxyPlot` 实现工业级曲线渲染，支持数十万点流畅缩放与平移。
+*   **双向绑定**：所见即所得的交互体验，拖拽曲线与修改表格数据实时同步。
+*   **专业视觉**：自带现代深色主题（炭灰背景 + 电光蓝/橙色高亮），缓解工程师长时间工作的视觉疲劳。
 
-## 🚀 Key Features
+## 技术栈
 
-### 1. Advanced Motion Definitions
-- **Dual Reference Domains:** Define segments by **Master Position** (degrees) OR **Time Duration** (seconds). The compiler automatically converts time to master angles based on global velocity.
-- **Coordinate Modes:** Support for **Absolute** positioning and **Relative** (Delta) movements.
-- **Flexible Segments:** Mix and match absolute/relative and time/master definitions in a single profile.
+*   **框架**：.NET 6+ / WPF
+*   **数学核心**：`MathNet.Numerics`
+*   **绘图引擎**：`OxyPlot.Wpf`
+*   **架构模式**：MVVM (Model-View-ViewModel)
 
-### 2. Comprehensive Motion Law Library
-- **Polynomial 5th Order (3-4-5):** The "Decathlete" — balanced S-curve acceleration (Rest-in-Rest).
-- **Cycloidal (Bestehorn):** Pure sinusoidal acceleration for high-speed, low-vibration applications.
-- **Modified Sine / Trapezoid:** Low jerk, high load capacity curves approximated via Polynomial 7.
+## 快速开始
 
-### 3. Real-Time Analytics
-- **Instant Visualization:** Interactive charts for Displacement ($S$), Velocity ($V$), Acceleration ($A$), and Jerk ($J$).
-- **Characteristic Dashboard:** Real-time calculation of $V_{max}$, $A_{max}$, and $J_{max}$ to evaluate motor sizing and mechanical stress.
+1.  打开 `Quintic.sln` 解决方案。
+2.  还原 NuGet 包：
+    ```bash
+    dotnet restore
+    ```
+3.  启动 `Quintic.Wpf` 项目。
 
-### 4. Industrial Integration
-- **Export:** Generate CSV point tables ready for import into Siemens, Rockwell, Beckhoff, or standard Servo Drives.
-- **Clean Architecture:** "Definition vs. Compilation" pattern ensures robust handling of complex logic.
+## 目录结构
 
----
-
-## 🏗️ Architecture
-
-- **Frontend:** React 19 + TypeScript + Vite + Recharts + TailwindCSS.
-- **Backend:** Python 3.11 + FastAPI + NumPy (Vectorized Kernels).
-- **Core Logic:**
-    1.  **User Definition:** Accepts flexible inputs (e.g., "Move 50mm in 100ms").
-    2.  **Compiler:** Resolves relative/time inputs into normalized absolute coordinates.
-    3.  **Math Kernel:** Executes high-precision vectorized polynomials to generate the profile.
+*   `Quintic.Wpf/`
+    *   `Themes/`: 存放 XAML 资源字典（深色主题定义）。
+    *   `ViewModels/`: MVVM 业务逻辑与数据绑定。
+    *   `Views/`: UI 界面文件。
+    *   `Models/`: 核心数据模型（Segment 定义等）。
+    *   `Controls/`: 自定义 UI 控件。
 
 ---
-
-## ⚡ Getting Started
-
-### Prerequisites
-- Node.js & npm
-- Python 3.11+
-- [uv](https://github.com/astral-sh/uv) (Recommended Python package manager)
-
-### 1. Start the Backend (Python)
-
-```bash
-cd quintic
-# Install dependencies and run server
-uv run uvicorn main:app --reload
-```
-*The API will be available at `http://localhost:8000`.*
-
-### 2. Start the Frontend (React)
-
-```bash
-cd web-client
-npm install
-npm run dev
-```
-*Open `http://localhost:5173` in your browser to start designing.*
-
----
-
-## 📚 Documentation
-
-See the `docs/` folder for detailed architectural decisions:
-- [Architecture Overview](docs/architecture.md)
-- [Project Roadmap & History](docs/roadmap.md)
+*Built with ❤️ for Motion Control Engineers.*
