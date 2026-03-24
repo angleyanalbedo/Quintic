@@ -11,8 +11,8 @@ class MotionLawType(str, Enum):
     """
 
     POLY5 = "Polynomial5"
-    MODIFIED_SINE = "ModifiedSine"  # Placeholder
-    CYCLOIDAL = "Cycloidal"  # Placeholder
+    MODIFIED_SINE = "ModifiedSine"  
+    CYCLOIDAL = "Cycloidal"  
     CONSTANT_VELOCITY = "ConstantVelocity"  # Placeholder
     # Future: Modified Trapezoid, S-Curve, Spline
 

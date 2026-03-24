@@ -5,9 +5,15 @@ from schemas.cam import (
     CoordinateMode,
     ReferenceType,
     Segment,
+    CalculationResponse,
+    PhysicalLimits,
 )
 from kernels.polynomial5 import Polynomial5
-from typing import List
+from kernels.cycloidal import Cycloidal
+from kernels.modified_trapezoid import ModifiedTrapezoid
+
+from typing import List, Tuple
+import math
 
 
 class CamCalculator:
@@ -76,13 +82,20 @@ class CamCalculator:
         return resolved_segments
 
     @staticmethod
-    def calculate_project(project: Project) -> List[CamPoint]:
+    def calculate_project(project: Project) -> CalculationResponse:
         # Step 1: Compile / Resolve Coordinates
         compiled_segments = CamCalculator._resolve_coordinates(project)
 
         full_profile = []
+        # Return empty response if no segments
         if not compiled_segments:
-            return []
+            return CalculationResponse(
+                points=[],
+                events=[],
+                max_velocity=0.0,
+                max_acceleration=0.0,
+                max_jerk=0.0,
+            )
 
         # Total Master Duration (Computed)
         # Use simple coalescing to avoid NoneType errors (though logic guarantees values)
@@ -107,15 +120,19 @@ class CamCalculator:
             else:
                 seg_res = max(2, int(resolution * (segment_master / total_master)))
 
-            # 2.2 Kernel Execution
-            # Currently MVP only supports Poly5
-            poly = Polynomial5(
-                master_start=m_start,
-                master_end=m_end,
-                slave_start=s_start,
-                slave_end=s_end,
-            )
-            segment_data = poly.generate_table(resolution=seg_res)
+            # 2.2 Kernel Execution (Factory Pattern)
+            kernel = None
+            if segment.motion_law == MotionLawType.CYCLOIDAL:
+                kernel = Cycloidal(m_start, m_end, s_start, s_end)
+            elif segment.motion_law == MotionLawType.MODIFIED_SINE:
+                kernel = ModifiedTrapezoid(
+                    m_start, m_end, s_start, s_end
+                )  # Using Poly 7 approx
+            else:
+                # Default to Poly5
+                kernel = Polynomial5(m_start, m_end, s_start, s_end)
+
+            segment_data = kernel.generate_table(resolution=seg_res)
 
             # 2.3 Stitching (Remove last point of current segment)
             if i < len(compiled_segments) - 1 and len(segment_data) > 0:
@@ -123,4 +140,27 @@ class CamCalculator:
 
             full_profile.extend(segment_data)
 
-        return full_profile
+        # Step 3: Analyze Characteristics
+        max_v = 0.0
+        max_a = 0.0
+        max_j = 0.0
+
+        if full_profile:
+            # Simple max(abs(x)) scan
+            max_v = max(abs(p["v"]) for p in full_profile)
+            max_a = max(abs(p["a"]) for p in full_profile)
+            max_j = max(abs(p["j"]) for p in full_profile)
+
+        # Convert list of dicts to list of CamPoint objects
+        cam_points = [
+            CamPoint(theta=p["theta"], s=p["s"], v=p["v"], a=p["a"], j=p["j"])
+            for p in full_profile
+        ]
+
+        return CalculationResponse(
+            points=cam_points,
+            events=[],  # Events logic placeholder
+            max_velocity=max_v,
+            max_acceleration=max_a,
+            max_jerk=max_j,
+        )

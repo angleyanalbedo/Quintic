@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { MotionLawType, CoordinateMode, ReferenceType } from './types';
-import type { Project, Segment, CamPoint } from './types';
+import type { Project, Segment, CamPoint, CalculationResponse } from './types';
 
 function App() {
   // 1. Project State with Industrial Schema
@@ -40,6 +40,7 @@ function App() {
   
   // 2. Data State
   const [data, setData] = useState<CamPoint[]>([]);
+  const [characteristics, setCharacteristics] = useState({ max_v: 0, max_a: 0, max_j: 0 });
   const [error, setError] = useState<string | null>(null);
 
   // 3. API Calculation
@@ -61,7 +62,6 @@ function App() {
                 reference_type: s.referenceType,
                 master_val: s.masterVal,
                 slave_val: s.slaveVal,
-                // Defaults for MVP
                 start_velocity: 0,
                 end_velocity: 0,
                 start_acceleration: 0,
@@ -81,10 +81,10 @@ function App() {
           throw new Error(errorData.detail || 'Failed to calculate');
         }
 
-        const result: CamPoint[] = await response.json();
+        const result: CalculationResponse = await response.json();
         
         // Process data
-        setData(result.map(p => ({
+        setData(result.points.map(p => ({
           ...p,
           s: parseFloat(p.s.toFixed(4)),
           v: parseFloat(p.v.toFixed(4)),
@@ -92,6 +92,13 @@ function App() {
           j: parseFloat(p.j.toFixed(4)),
           theta: parseFloat(p.theta.toFixed(2))
         })));
+        
+        setCharacteristics({
+            max_v: parseFloat(result.max_velocity.toFixed(3)),
+            max_a: parseFloat(result.max_acceleration.toFixed(3)),
+            max_j: parseFloat(result.max_jerk.toFixed(3))
+        });
+        
         setError(null);
 
       } catch (err: any) {
@@ -107,10 +114,6 @@ function App() {
 
   // Segment Management
   const addSegment = () => {
-    // const lastSeg = project.segments[project.segments.length - 1];
-    
-    // Logic for new segment defaults depends on mode
-    // For MVP simplicity, just add a relative segment
     const newSegment: Segment = {
         id: Date.now().toString(),
         motionLaw: MotionLawType.POLY5,
@@ -165,8 +168,28 @@ function App() {
             <p className="text-xs text-gray-400 mt-1">VDI 2143 (Relative, Time-Based, Events)</p>
           </div>
           <div className="flex gap-4 items-center">
-            <div className="text-xs text-gray-500">
-                Master Vel: <input type="number" value={project.config.masterVelocity} onChange={(e) => setProject({...project, config: {...project.config, masterVelocity: Number(e.target.value)}})} className="w-12 border rounded px-1"/> RPM
+            {/* Characteristics Dashboard */}
+            <div className="flex gap-4 bg-gray-100 px-4 py-2 rounded-lg border border-gray-200">
+                <div className="text-center">
+                    <span className="block text-[10px] text-gray-500 uppercase tracking-wider">Max Vel</span>
+                    <span className="text-sm font-bold text-blue-600">{characteristics.max_v}</span>
+                </div>
+                <div className="w-px bg-gray-300"></div>
+                <div className="text-center">
+                    <span className="block text-[10px] text-gray-500 uppercase tracking-wider">Max Acc</span>
+                    <span className="text-sm font-bold text-green-600">{characteristics.max_a}</span>
+                </div>
+                <div className="w-px bg-gray-300"></div>
+                <div className="text-center">
+                    <span className="block text-[10px] text-gray-500 uppercase tracking-wider">Max Jerk</span>
+                    <span className="text-sm font-bold text-orange-600">{characteristics.max_j}</span>
+                </div>
+            </div>
+
+            <div className="flex items-center gap-2 text-xs text-gray-500 border-l pl-4 border-gray-200">
+                <span className="whitespace-nowrap">Master Vel:</span> 
+                <input type="number" value={project.config.masterVelocity} onChange={(e) => setProject({...project, config: {...project.config, masterVelocity: Number(e.target.value)}})} className="w-12 border rounded px-1"/> 
+                <span>RPM</span>
             </div>
             <button onClick={handleExport} className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 px-4 rounded transition-colors">
                 Export CSV
@@ -255,10 +278,11 @@ function App() {
                                      <select 
                                         value={seg.motionLaw}
                                         onChange={(e) => updateSegment(seg.id, 'motionLaw', e.target.value)}
-                                        className="w-full bg-transparent text-xs text-gray-500 focus:outline-none"
+                                        className="w-full bg-transparent text-xs text-gray-700 font-medium focus:outline-none"
                                     >
-                                        <option value={MotionLawType.POLY5}>Law: Polynomial 5 (R-R)</option>
-                                        <option value={MotionLawType.MODIFIED_SINE} disabled>Law: Modified Sine</option>
+                                        <option value={MotionLawType.POLY5}>Polynomial 5 (3-4-5)</option>
+                                        <option value={MotionLawType.CYCLOIDAL}>Cycloidal (Bestehorn)</option>
+                                        <option value={MotionLawType.MODIFIED_SINE}>Modified Sine / Trapezoid</option>
                                     </select>
                                 </div>
                             </div>

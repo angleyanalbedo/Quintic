@@ -1,12 +1,11 @@
 from fastapi import APIRouter, HTTPException
-from typing import List
-from schemas.cam import Project, CamPoint
+from schemas.cam import Project, CalculationResponse
 from services.calculator import CamCalculator
 
 router = APIRouter()
 
 
-@router.post("/calculate_project", response_model=List[CamPoint])
+@router.post("/calculate_project", response_model=CalculationResponse)
 async def calculate_project(project: Project):
     try:
         return CamCalculator.calculate_project(project)

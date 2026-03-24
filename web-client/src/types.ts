@@ -54,3 +54,11 @@ export interface CamPoint {
   a: number;
   j: number;
 }
+
+export interface CalculationResponse {
+  points: CamPoint[];
+  max_velocity: number;
+  max_acceleration: number;
+  max_jerk: number;
+  events: any[];
+}
