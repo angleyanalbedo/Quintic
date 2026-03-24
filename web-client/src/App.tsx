@@ -1,19 +1,40 @@
 import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { MotionLawType } from './types';
+import { MotionLawType, CoordinateMode, ReferenceType } from './types';
 import type { Project, Segment, CamPoint } from './types';
 
 function App() {
-  // 1. Project State
+  // 1. Project State with Industrial Schema
   const [project, setProject] = useState<Project>({
     config: {
       masterVelocity: 60,
       resolution: 360
     },
     segments: [
-      { id: '1', motionLaw: MotionLawType.POLY5, masterStart: 0, masterEnd: 90, slaveStart: 0, slaveEnd: 50 },
-      { id: '2', motionLaw: MotionLawType.POLY5, masterStart: 90, masterEnd: 180, slaveStart: 50, slaveEnd: 50 },
-      { id: '3', motionLaw: MotionLawType.POLY5, masterStart: 180, masterEnd: 360, slaveStart: 50, slaveEnd: 0 }
+      { 
+          id: '1', 
+          motionLaw: MotionLawType.POLY5, 
+          coordinateMode: CoordinateMode.ABSOLUTE,
+          referenceType: ReferenceType.MASTER,
+          masterVal: 90, 
+          slaveVal: 50 
+      },
+      { 
+          id: '2', 
+          motionLaw: MotionLawType.POLY5,
+          coordinateMode: CoordinateMode.RELATIVE, // Relative Mode Example
+          referenceType: ReferenceType.MASTER,
+          masterVal: 90, 
+          slaveVal: 0 // Dwell (Relative 0)
+      },
+      { 
+          id: '3', 
+          motionLaw: MotionLawType.POLY5,
+          coordinateMode: CoordinateMode.ABSOLUTE,
+          referenceType: ReferenceType.MASTER,
+          masterVal: 360, 
+          slaveVal: 0 
+      }
     ]
   });
   
@@ -24,7 +45,6 @@ function App() {
   // 3. API Calculation
   useEffect(() => {
     const fetchData = async () => {
-      // Basic validation
       if (project.segments.length === 0) return;
 
       try {
@@ -37,15 +57,16 @@ function App() {
             segments: project.segments.map(s => ({
                 id: s.id,
                 motion_law: s.motionLaw,
-                master_start: s.masterStart,
-                master_end: s.masterEnd,
-                slave_start: s.slaveStart,
-                slave_end: s.slaveEnd,
+                coordinate_mode: s.coordinateMode,
+                reference_type: s.referenceType,
+                master_val: s.masterVal,
+                slave_val: s.slaveVal,
                 // Defaults for MVP
                 start_velocity: 0,
                 end_velocity: 0,
                 start_acceleration: 0,
-                end_acceleration: 0
+                end_acceleration: 0,
+                lambda_param: 0.5
             }))
         };
 
@@ -86,17 +107,17 @@ function App() {
 
   // Segment Management
   const addSegment = () => {
-    const lastSeg = project.segments[project.segments.length - 1];
-    const newStart = lastSeg ? lastSeg.masterEnd : 0;
-    const newSlaveStart = lastSeg ? lastSeg.slaveEnd : 0;
+    // const lastSeg = project.segments[project.segments.length - 1];
     
+    // Logic for new segment defaults depends on mode
+    // For MVP simplicity, just add a relative segment
     const newSegment: Segment = {
         id: Date.now().toString(),
         motionLaw: MotionLawType.POLY5,
-        masterStart: newStart,
-        masterEnd: newStart + 90,
-        slaveStart: newSlaveStart,
-        slaveEnd: newSlaveStart
+        coordinateMode: CoordinateMode.RELATIVE,
+        referenceType: ReferenceType.MASTER,
+        masterVal: 90, // Delta 90 deg
+        slaveVal: 0    // Dwell
     };
     
     setProject({ ...project, segments: [...project.segments, newSegment] });
@@ -140,21 +161,26 @@ function App() {
         
         <header className="flex justify-between items-center border-b pb-4">
           <div>
-            <h1 className="text-2xl font-bold text-indigo-600">Quintic <span className="text-gray-500 text-lg font-normal">Project Editor</span></h1>
-            <p className="text-xs text-gray-400 mt-1">VDI 2143 Multi-Segment Design</p>
+            <h1 className="text-2xl font-bold text-indigo-600">Quintic <span className="text-gray-500 text-lg font-normal">Industrial Editor</span></h1>
+            <p className="text-xs text-gray-400 mt-1">VDI 2143 (Relative, Time-Based, Events)</p>
           </div>
-          <button onClick={handleExport} className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 px-4 rounded transition-colors">
-            Export CSV
-          </button>
+          <div className="flex gap-4 items-center">
+            <div className="text-xs text-gray-500">
+                Master Vel: <input type="number" value={project.config.masterVelocity} onChange={(e) => setProject({...project, config: {...project.config, masterVelocity: Number(e.target.value)}})} className="w-12 border rounded px-1"/> RPM
+            </div>
+            <button onClick={handleExport} className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 px-4 rounded transition-colors">
+                Export CSV
+            </button>
+          </div>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
             {/* Left: Segment List */}
-            <div className="lg:col-span-4 space-y-4">
+            <div className="lg:col-span-5 space-y-4">
                 <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                     <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-sm font-semibold text-gray-700">Motion Segments</h2>
+                        <h2 className="text-sm font-semibold text-gray-700">Motion Sequence</h2>
                         <button onClick={addSegment} className="text-indigo-600 hover:text-indigo-800 text-xs font-bold uppercase tracking-wide">
                             + Add Segment
                         </button>
@@ -163,17 +189,8 @@ function App() {
                     <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
                         {project.segments.map((seg, idx) => (
                             <div key={seg.id} className="bg-gray-50 p-3 rounded border border-gray-100 text-sm space-y-2 relative group">
-                                <div className="flex justify-between items-center">
-                                    <span className="font-mono text-xs text-gray-400">#{idx + 1}</span>
-                                    <select 
-                                        value={seg.motionLaw}
-                                        onChange={(e) => updateSegment(seg.id, 'motionLaw', e.target.value)}
-                                        className="bg-white border border-gray-200 rounded text-xs py-1 px-2 focus:outline-none focus:border-indigo-500"
-                                    >
-                                        <option value={MotionLawType.POLY5}>Poly 5 (3-4-5)</option>
-                                        <option value={MotionLawType.MODIFIED_SINE} disabled>Modified Sine (Soon)</option>
-                                        <option value={MotionLawType.CYCLOIDAL} disabled>Cycloidal (Soon)</option>
-                                    </select>
+                                <div className="flex justify-between items-center border-b border-gray-100 pb-2 mb-2">
+                                    <span className="font-mono text-xs text-gray-400 font-bold">SEGMENT #{idx + 1}</span>
                                     {project.segments.length > 1 && (
                                         <button onClick={() => removeSegment(seg.id)} className="text-gray-300 hover:text-red-500 transition-colors">
                                             ×
@@ -181,23 +198,68 @@ function App() {
                                     )}
                                 </div>
                                 
+                                {/* Definition Mode Row */}
+                                <div className="grid grid-cols-2 gap-2 mb-2">
+                                    <div>
+                                        <label className="text-[10px] text-gray-400 block uppercase">Ref Type</label>
+                                        <select 
+                                            value={seg.referenceType}
+                                            onChange={(e) => updateSegment(seg.id, 'referenceType', e.target.value)}
+                                            className="w-full bg-white border border-gray-200 rounded text-xs py-1 px-2"
+                                        >
+                                            <option value={ReferenceType.MASTER}>Master Pos</option>
+                                            <option value={ReferenceType.TIME}>Time Duration</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] text-gray-400 block uppercase">Coord Mode</label>
+                                        <select 
+                                            value={seg.coordinateMode}
+                                            onChange={(e) => updateSegment(seg.id, 'coordinateMode', e.target.value)}
+                                            className="w-full bg-white border border-gray-200 rounded text-xs py-1 px-2"
+                                        >
+                                            <option value={CoordinateMode.ABSOLUTE}>Absolute</option>
+                                            <option value={CoordinateMode.RELATIVE}>Relative</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {/* Values Row */}
                                 <div className="grid grid-cols-2 gap-2">
                                     <div>
-                                        <label className="text-[10px] text-gray-400 block uppercase">Master Start</label>
-                                        <input type="number" value={seg.masterStart} onChange={(e) => updateSegment(seg.id, 'masterStart', Number(e.target.value))} className="w-full bg-white border border-gray-200 rounded px-2 py-1" />
+                                        <label className="text-[10px] text-gray-400 block uppercase text-indigo-600 font-bold">
+                                            {seg.referenceType === ReferenceType.TIME ? 'Duration (s)' : (seg.coordinateMode === CoordinateMode.RELATIVE ? 'Delta Master' : 'Master End')}
+                                        </label>
+                                        <input 
+                                            type="number" 
+                                            value={seg.masterVal} 
+                                            onChange={(e) => updateSegment(seg.id, 'masterVal', Number(e.target.value))} 
+                                            className="w-full bg-white border border-gray-200 rounded px-2 py-1 font-mono text-indigo-700" 
+                                        />
                                     </div>
                                     <div>
-                                        <label className="text-[10px] text-gray-400 block uppercase">Master End</label>
-                                        <input type="number" value={seg.masterEnd} onChange={(e) => updateSegment(seg.id, 'masterEnd', Number(e.target.value))} className="w-full bg-white border border-gray-200 rounded px-2 py-1" />
+                                        <label className="text-[10px] text-gray-400 block uppercase text-indigo-600 font-bold">
+                                            {seg.coordinateMode === CoordinateMode.RELATIVE ? 'Delta Slave' : 'Slave End'}
+                                        </label>
+                                        <input 
+                                            type="number" 
+                                            value={seg.slaveVal} 
+                                            onChange={(e) => updateSegment(seg.id, 'slaveVal', Number(e.target.value))} 
+                                            className="w-full bg-white border border-gray-200 rounded px-2 py-1 font-mono text-indigo-700" 
+                                        />
                                     </div>
-                                    <div>
-                                        <label className="text-[10px] text-gray-400 block uppercase">Slave Start</label>
-                                        <input type="number" value={seg.slaveStart} onChange={(e) => updateSegment(seg.id, 'slaveStart', Number(e.target.value))} className="w-full bg-white border border-gray-200 rounded px-2 py-1" />
-                                    </div>
-                                    <div>
-                                        <label className="text-[10px] text-gray-400 block uppercase">Slave End</label>
-                                        <input type="number" value={seg.slaveEnd} onChange={(e) => updateSegment(seg.id, 'slaveEnd', Number(e.target.value))} className="w-full bg-white border border-gray-200 rounded px-2 py-1" />
-                                    </div>
+                                </div>
+
+                                {/* Law Selection */}
+                                <div className="mt-2 pt-2 border-t border-gray-100">
+                                     <select 
+                                        value={seg.motionLaw}
+                                        onChange={(e) => updateSegment(seg.id, 'motionLaw', e.target.value)}
+                                        className="w-full bg-transparent text-xs text-gray-500 focus:outline-none"
+                                    >
+                                        <option value={MotionLawType.POLY5}>Law: Polynomial 5 (R-R)</option>
+                                        <option value={MotionLawType.MODIFIED_SINE} disabled>Law: Modified Sine</option>
+                                    </select>
                                 </div>
                             </div>
                         ))}
@@ -212,7 +274,7 @@ function App() {
             </div>
 
             {/* Right: Visualization */}
-            <div className="lg:col-span-8 space-y-4">
+            <div className="lg:col-span-7 space-y-4">
                 <div className="grid grid-cols-1 gap-4">
                     <ChartCard title="Displacement (S)" dataKey="s" data={data} color="#4f46e5" unit="mm" />
                     <ChartCard title="Velocity (V)" dataKey="v" data={data} color="#0ea5e9" unit="mm/deg" />

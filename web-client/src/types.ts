@@ -7,16 +7,34 @@ export const MotionLawType = {
   CYCLOIDAL: "Cycloidal",
   CONSTANT_VELOCITY: "ConstantVelocity"
 } as const;
-
 export type MotionLawType = typeof MotionLawType[keyof typeof MotionLawType];
+
+export const CoordinateMode = {
+  ABSOLUTE: "Absolute",
+  RELATIVE: "Relative"
+} as const;
+export type CoordinateMode = typeof CoordinateMode[keyof typeof CoordinateMode];
+
+export const ReferenceType = {
+  MASTER: "Master",
+  TIME: "Time"
+} as const;
+export type ReferenceType = typeof ReferenceType[keyof typeof ReferenceType];
 
 export interface Segment {
   id: string;
   motionLaw: MotionLawType;
-  masterStart: number;
-  masterEnd: number;
-  slaveStart: number;
-  slaveEnd: number;
+  
+  // New Fields for Industrial Motion Kernel
+  coordinateMode: CoordinateMode;
+  referenceType: ReferenceType;
+  
+  // Flexible Value Fields (Interpretation depends on Mode/Ref)
+  masterVal: number; // Absolute End OR Delta OR Duration
+  slaveVal: number;  // Absolute End OR Delta
+  
+  // Display Helpers (Optional, calculated by backend but maybe useful to track local state)
+  // For MVP editing, we just use masterVal/slaveVal directly
 }
 
 export interface ProjectConfig {
