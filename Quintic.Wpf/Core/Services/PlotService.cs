@@ -17,6 +17,26 @@ namespace Quintic.Wpf.Core.Services
             InitializePlots();
         }
 
+        public void ResetAxes()
+        {
+            SPlotModel.ResetAllAxes();
+            VAPlotModel.ResetAllAxes();
+            SPlotModel.InvalidatePlot(true);
+            VAPlotModel.InvalidatePlot(true);
+        }
+
+        public void SetSeriesVisibility(string seriesKey, bool isVisible)
+        {
+            foreach (var series in VAPlotModel.Series)
+            {
+                if (series is LineSeries lineSeries && lineSeries.YAxisKey == seriesKey)
+                {
+                    lineSeries.IsVisible = isVisible;
+                }
+            }
+            VAPlotModel.InvalidatePlot(true);
+        }
+
         public void UpdatePlots(CalculationResponse response)
         {
             if (SPlotModel == null || VAPlotModel == null) return;

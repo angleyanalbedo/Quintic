@@ -21,6 +21,19 @@
                 </oxy:TrackerControl.Content>
             </oxy:TrackerControl>
         </ControlTemplate>
+
+        <Style TargetType="ContextMenu">
+            <Setter Property="Background" Value="{StaticResource Brush.Control.Background}"/>
+            <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Brush.Control.Border}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style TargetType="MenuItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
     </UserControl.Resources>
 
     <Grid>
@@ -33,7 +46,13 @@
         <!-- Area B: S Curve (Displacement) -->
         <Border Grid.Row="0" Background="{StaticResource Brush.PlotBackground}" CornerRadius="2" Margin="0,0,0,0">
             <Grid>
-                <oxy:PlotView Model="{Binding SPlotModel}" Background="Transparent" DefaultTrackerTemplate="{StaticResource DarkTrackerTemplate}" />
+                <oxy:PlotView Model="{Binding SPlotModel}" Background="Transparent" DefaultTrackerTemplate="{StaticResource DarkTrackerTemplate}">
+                    <oxy:PlotView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Reset View" Command="{Binding ResetViewCommand}"/>
+                        </ContextMenu>
+                    </oxy:PlotView.ContextMenu>
+                </oxy:PlotView>
                 
                 <!-- HUD Overlay -->
                 <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Margin="20" Orientation="Horizontal">
@@ -49,7 +68,17 @@
         <!-- Area C: V/A/J Curves (Derivatives) -->
         <Border Grid.Row="2" Background="{StaticResource Brush.PlotBackground}" CornerRadius="2">
             <Grid>
-                <oxy:PlotView Model="{Binding VAPlotModel}" Background="Transparent" DefaultTrackerTemplate="{StaticResource DarkTrackerTemplate}" />
+                <oxy:PlotView Model="{Binding VAPlotModel}" Background="Transparent" DefaultTrackerTemplate="{StaticResource DarkTrackerTemplate}">
+                    <oxy:PlotView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Reset View" Command="{Binding ResetViewCommand}"/>
+                            <Separator/>
+                            <MenuItem Header="Velocity" IsCheckable="True" IsChecked="{Binding IsVelocityVisible}"/>
+                            <MenuItem Header="Acceleration" IsCheckable="True" IsChecked="{Binding IsAccelerationVisible}"/>
+                            <MenuItem Header="Jerk" IsCheckable="True" IsChecked="{Binding IsJerkVisible}"/>
+                        </ContextMenu>
+                    </oxy:PlotView.ContextMenu>
+                </oxy:PlotView>
                 
                 <!-- HUD Overlay -->
                 <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Margin="20" Background="#80111111">
