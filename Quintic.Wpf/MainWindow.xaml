@@ -8,7 +8,7 @@
         xmlns:core="clr-namespace:Quintic.Wpf.Core.Models"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="Quintic - Advanced Cam Editor" Height="900" Width="1600"
+        Title="Quintic - Advanced Cam Editor" Height="768" Width="1280"
         Background="{StaticResource Brush.Background}"
         Foreground="{StaticResource Brush.Text.Primary}"
         WindowStartupLocation="CenterScreen">
