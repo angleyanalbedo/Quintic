@@ -10,6 +10,8 @@ namespace Quintic.Wpf.Core.Services
         public PlotModel SPlotModel { get; private set; }
         public PlotModel VAPlotModel { get; private set; }
 
+        private bool _isSyncingAxes = false;
+
         public PlotService()
         {
             InitializePlots();
@@ -65,7 +67,7 @@ namespace Quintic.Wpf.Core.Services
                 TextColor = textColor
             };
 
-            SPlotModel.Axes.Add(new LinearAxis
+            var sXAxis = new LinearAxis
             {
                 Position = AxisPosition.Bottom,
                 Title = "Master Angle (°)",
@@ -75,7 +77,8 @@ namespace Quintic.Wpf.Core.Services
                 AxislineStyle = LineStyle.Solid,
                 AxislineColor = tickColor,
                 TextColor = textColor
-            });
+            };
+            SPlotModel.Axes.Add(sXAxis);
 
             SPlotModel.Axes.Add(new LinearAxis
             {
@@ -104,7 +107,7 @@ namespace Quintic.Wpf.Core.Services
                 TextColor = textColor
             };
 
-            VAPlotModel.Axes.Add(new LinearAxis
+            var vaXAxis = new LinearAxis
             {
                 Position = AxisPosition.Bottom,
                 Title = "Master Angle (°)",
@@ -113,7 +116,28 @@ namespace Quintic.Wpf.Core.Services
                 TickStyle = TickStyle.None,
                 AxislineColor = tickColor,
                 TextColor = textColor
-            });
+            };
+            VAPlotModel.Axes.Add(vaXAxis);
+
+            // --- Axis Synchronization Logic ---
+            // When the user zooms/pans one plot, the other follows instantly.
+            sXAxis.AxisChanged += (s, e) =>
+            {
+                if (_isSyncingAxes) return;
+                _isSyncingAxes = true;
+                vaXAxis.Zoom(sXAxis.ActualMinimum, sXAxis.ActualMaximum);
+                VAPlotModel.InvalidatePlot(false);
+                _isSyncingAxes = false;
+            };
+
+            vaXAxis.AxisChanged += (s, e) =>
+            {
+                if (_isSyncingAxes) return;
+                _isSyncingAxes = true;
+                sXAxis.Zoom(vaXAxis.ActualMinimum, vaXAxis.ActualMaximum);
+                SPlotModel.InvalidatePlot(false);
+                _isSyncingAxes = false;
+            };
 
             VAPlotModel.Axes.Add(new LinearAxis
             {

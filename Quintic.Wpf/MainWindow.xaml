@@ -56,19 +56,39 @@
                           RowHeight="28">
                     <DataGrid.Columns>
                         <!-- Master Start (Computed, ReadOnly) -->
-                        <DataGridTextColumn Header="M.Start" Binding="{Binding ComputedMasterStart, StringFormat=F1}" Width="0.7*" IsReadOnly="True" Foreground="Gray"/>
-                        
+                        <DataGridTextColumn Binding="{Binding ComputedMasterStart, StringFormat=F1}" Width="0.7*" IsReadOnly="True" Foreground="Gray">
+                            <DataGridTextColumn.Header>
+                                <TextBlock Text="M.Start" ToolTip="Master Start Angle (deg) - Calculated automatically"/>
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+
                         <!-- Master End (Editable) -->
-                        <DataGridTextColumn Header="M.End" Binding="{Binding MasterVal, StringFormat=F1}" Width="0.7*"/>
-                        
+                        <DataGridTextColumn Binding="{Binding MasterVal, StringFormat=F1}" Width="0.7*">
+                            <DataGridTextColumn.Header>
+                                <TextBlock Text="M.End" ToolTip="Master End Angle (deg) or Duration"/>
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+
                         <!-- Slave Start (Computed, ReadOnly) -->
-                        <DataGridTextColumn Header="S.Start" Binding="{Binding ComputedSlaveStart, StringFormat=F1}" Width="0.7*" IsReadOnly="True" Foreground="Gray"/>
-                        
+                        <DataGridTextColumn Binding="{Binding ComputedSlaveStart, StringFormat=F1}" Width="0.7*" IsReadOnly="True" Foreground="Gray">
+                            <DataGridTextColumn.Header>
+                                <TextBlock Text="S.Start" ToolTip="Slave Start Position (mm) - Calculated automatically"/>
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+
                         <!-- Slave End (Editable) -->
-                        <DataGridTextColumn Header="S.End" Binding="{Binding SlaveVal, StringFormat=F1}" Width="0.7*"/>
-                        
+                        <DataGridTextColumn Binding="{Binding SlaveVal, StringFormat=F1}" Width="0.7*">
+                            <DataGridTextColumn.Header>
+                                <TextBlock Text="S.End" ToolTip="Slave End Position (mm) or Stroke"/>
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+
                         <!-- Motion Law -->
-                        <DataGridComboBoxColumn Header="Law" Width="1.5*" SelectedItemBinding="{Binding MotionLaw}" ItemsSource="{Binding Source={StaticResource MotionLawEnum}}"/>
+                        <DataGridComboBoxColumn Width="1.5*" SelectedItemBinding="{Binding MotionLaw}" ItemsSource="{Binding Source={StaticResource MotionLawEnum}}">
+                            <DataGridComboBoxColumn.Header>
+                                <TextBlock Text="Law" ToolTip="Motion Law / Curve Type"/>
+                            </DataGridComboBoxColumn.Header>
+                        </DataGridComboBoxColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </DockPanel>
