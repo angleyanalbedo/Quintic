@@ -118,13 +118,19 @@ namespace Quintic.Wpf.Core.Services
                 switch (segment.MotionLaw)
                 {
                     case MotionLawType.Cycloidal:
-                        // kernel = new Cycloidal(mStart, mEnd, sStart, sEnd);
-                        kernel = new Polynomial5(mStart, mEnd, sStart, sEnd); // Fallback
+                        kernel = new Cycloidal(mStart, mEnd, sStart, sEnd);
                         break;
                     case MotionLawType.ModifiedSine:
-                         // kernel = new ModifiedTrapezoid(mStart, mEnd, sStart, sEnd);
-                         kernel = new Polynomial5(mStart, mEnd, sStart, sEnd); // Fallback
+                    case MotionLawType.ModifiedTrapezoid:
+                        kernel = new ModifiedTrapezoid(mStart, mEnd, sStart, sEnd);
                         break;
+                    case MotionLawType.ConstantVelocity:
+                        kernel = new ConstantVelocity(mStart, mEnd, sStart, sEnd);
+                        break;
+                    case MotionLawType.Dwell:
+                        kernel = new Dwell(mStart, mEnd, sStart);
+                        break;
+                    case MotionLawType.Polynomial5:
                     default:
                         // Default to Poly5
                         kernel = new Polynomial5(mStart, mEnd, sStart, sEnd);

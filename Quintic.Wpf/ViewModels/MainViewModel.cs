@@ -6,9 +6,12 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Linq;
+using System.Windows.Input;
+using Microsoft.Win32;
 
 using Quintic.Wpf.Core.Models;
 using Quintic.Wpf.Core.Services;
+using Quintic.Wpf.Core.Commands;
 
 namespace Quintic.Wpf.ViewModels
 {
@@ -18,6 +21,9 @@ namespace Quintic.Wpf.ViewModels
         public PlotModel VAPlotModel { get; private set; }
         public ObservableCollection<Segment> Segments { get; set; }
         public ProjectConfig Config { get; set; }
+        public ICommand ExportCsvCommand { get; private set; }
+
+        private CalculationResponse _lastCalculation;
 
         public MainViewModel()
         {
@@ -37,8 +43,27 @@ namespace Quintic.Wpf.ViewModels
                 seg.PropertyChanged += OnSegmentPropertyChanged;
             }
 
+            ExportCsvCommand = new RelayCommand(ExecuteExportCsv);
+
             InitializePlots();
             Recalculate();
+        }
+
+        private void ExecuteExportCsv(object obj)
+        {
+            if (_lastCalculation == null || _lastCalculation.Points.Count == 0) return;
+
+            var saveFileDialog = new SaveFileDialog
+            {
+                Filter = "CSV File (*.csv)|*.csv|Text File (*.txt)|*.txt",
+                DefaultExt = ".csv",
+                FileName = "CamProfile.csv"
+            };
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                CsvExporter.Export(saveFileDialog.FileName, _lastCalculation);
+            }
         }
 
         private void OnSegmentsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -58,25 +83,15 @@ namespace Quintic.Wpf.ViewModels
 
         private void OnSegmentPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            // Avoid infinite loop if we react to computed properties
             if (e.PropertyName.StartsWith("Computed")) return;
             Recalculate();
         }
 
         private void Recalculate()
         {
-            var response = CamCalculator.CalculateProject(Segments.ToList(), Config);
-            UpdatePlots(response);
+            _lastCalculation = CamCalculator.CalculateProject(Segments.ToList(), Config);
+            UpdatePlots(_lastCalculation);
 
-            // Also update computed properties for the DataGrid to display correct "Start" values
-            // CamCalculator.ResolveCoordinates returns NEW instances, so we need to sync back 
-            // OR we can just rely on the fact that the calculation is stateless. 
-            // Actually, the DataGrid binds to 'Segments'. 
-            // The 'ResolveCoordinates' method in CamCalculator returns a NEW list of segments with computed values.
-            // We should probably update the existing segments with the computed values so the UI shows them.
-            
-            // Re-run resolution on the LIVE segments to update their computed properties in-place?
-            // Or just manually update them here for display purposes.
             double currentM = 0;
             double currentS = 0;
             foreach (var seg in Segments)
@@ -84,12 +99,6 @@ namespace Quintic.Wpf.ViewModels
                 seg.ComputedMasterStart = currentM;
                 seg.ComputedSlaveStart = currentS;
                 
-                // Simple logic for display update (ignoring complex time/relative logic for a moment, or replicating it)
-                // To do this strictly correctly, we should use the Logic from CamCalculator.
-                // But CamCalculator.ResolveCoordinates works on a copy.
-                // Let's just trust the plot for now, and maybe update 'Computed' fields if we want to show them.
-                
-                // Simplified update for UI "Start" columns:
                 if (seg.CoordinateMode == CoordinateMode.Absolute)
                 {
                     seg.ComputedMasterEnd = seg.MasterVal;
@@ -185,7 +194,6 @@ namespace Quintic.Wpf.ViewModels
                 Color = OxyColor.Parse("#3498DB"),
                 StrokeThickness = 3,
                 MarkerType = MarkerType.None // Performance optimization for high resolution
-                // Smooth = false
             });
 
             // --- V/A/J Plot ---
