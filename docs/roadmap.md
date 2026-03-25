@@ -86,3 +86,7 @@ This document outlines the architectural evolution of the Quintic Cam Editor, fr
 ### 6.2 Online Monitoring (Digital Twin)
 - Connect to the PLC via OPC UA / Modbus.
 - Overlay the **"Actual Position"** (Encoder Feedback) on top of the **"Command Position"** (Quintic Profile) to diagnose tracking errors in real-time.
+
+### 6.3 Mechanical Export
+- **DXF/DWG Generation:** Export the 2D cam profile geometry for mechanical CAD (SolidWorks/AutoCAD).
+- **Report Generation:** Generate PDF datasheets with position tables and min/max values for documentation.
