@@ -1,0 +1,55 @@
+<UserControl x:Class="Quintic.Wpf.Views.CamPlotView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:oxy="http://oxyplot.org/wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="3*" MinHeight="200"/> <!-- Area B: S Curve (Main) -->
+            <RowDefinition Height="Auto"/>               <!-- Splitter -->
+            <RowDefinition Height="1.5*" MinHeight="150"/> <!-- Area C: V/A/J Curves (Secondary) -->
+        </Grid.RowDefinitions>
+
+        <!-- Area B: S Curve (Displacement) -->
+        <Border Grid.Row="0" Background="{StaticResource Brush.PlotBackground}" CornerRadius="2" Margin="0,0,0,0">
+            <Grid>
+                <oxy:PlotView Model="{Binding SPlotModel}" Background="Transparent" />
+                
+                <!-- HUD Overlay -->
+                <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Margin="20" Orientation="Horizontal">
+                    <Border Width="12" Height="12" Background="{StaticResource Brush.Accent}" CornerRadius="6" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="Displacement (S)" Foreground="{StaticResource Brush.Accent}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Splitter (Horizontal) -->
+        <GridSplitter Grid.Row="1" Height="6" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="Transparent" ShowsPreview="True"/>
+
+        <!-- Area C: V/A/J Curves (Derivatives) -->
+        <Border Grid.Row="2" Background="{StaticResource Brush.PlotBackground}" CornerRadius="2">
+            <Grid>
+                <oxy:PlotView Model="{Binding VAPlotModel}" Background="Transparent" />
+                
+                <!-- HUD Overlay -->
+                <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Margin="20" Background="#80111111">
+                     <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                        <Border Width="10" Height="10" Background="{StaticResource Brush.Success}" CornerRadius="5" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Velocity (V)" Foreground="{StaticResource Brush.Success}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                        <Border Width="10" Height="10" Background="{StaticResource Brush.Warning}" CornerRadius="5" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Acceleration (A)" Foreground="{StaticResource Brush.Warning}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="10" Height="10" Background="#9B59B6" CornerRadius="5" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Jerk (J)" Foreground="#9B59B6" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

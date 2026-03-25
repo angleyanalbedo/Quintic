@@ -1,0 +1,75 @@
+<UserControl x:Class="Quintic.Wpf.Views.SegmentTableView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:core="clr-namespace:Quintic.Wpf.Core.Models"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="400">
+    
+    <UserControl.Resources>
+        <ObjectDataProvider x:Key="MotionLawEnum" MethodName="GetValues" ObjectType="{x:Type system:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="core:MotionLawType"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </UserControl.Resources>
+
+    <Border Background="{StaticResource Brush.Control.Background}" CornerRadius="2" Padding="0">
+        <DockPanel>
+            <!-- Header Strip -->
+            <Border DockPanel.Dock="Top" Background="{StaticResource Brush.Control.Border}" Padding="10,6" CornerRadius="2,2,0,0">
+                <DockPanel>
+                     <TextBlock Text="SEGMENT TABLE" FontSize="12" FontWeight="Bold" Foreground="{StaticResource Brush.Text.Secondary}" VerticalAlignment="Center" DockPanel.Dock="Left"/>
+                </DockPanel>
+            </Border>
+            
+            <DataGrid ItemsSource="{Binding Segments}" 
+                      AutoGenerateColumns="False" 
+                      CanUserAddRows="True" 
+                      CanUserDeleteRows="True"
+                      GridLinesVisibility="Horizontal"
+                      HeadersVisibility="Column"
+                      BorderThickness="0"
+                      RowHeight="28">
+                <DataGrid.Columns>
+                    <!-- Master Start (Computed, ReadOnly) -->
+                    <DataGridTextColumn Binding="{Binding ComputedMasterStart, StringFormat=F1}" Width="0.7*" IsReadOnly="True" Foreground="Gray">
+                        <DataGridTextColumn.Header>
+                            <TextBlock Text="M.Start" ToolTip="Master Start Angle (deg) - Calculated automatically"/>
+                        </DataGridTextColumn.Header>
+                    </DataGridTextColumn>
+
+                    <!-- Master End (Editable) -->
+                    <DataGridTextColumn Binding="{Binding MasterVal, StringFormat=F1}" Width="0.7*">
+                        <DataGridTextColumn.Header>
+                            <TextBlock Text="M.End" ToolTip="Master End Angle (deg) or Duration"/>
+                        </DataGridTextColumn.Header>
+                    </DataGridTextColumn>
+
+                    <!-- Slave Start (Computed, ReadOnly) -->
+                    <DataGridTextColumn Binding="{Binding ComputedSlaveStart, StringFormat=F1}" Width="0.7*" IsReadOnly="True" Foreground="Gray">
+                        <DataGridTextColumn.Header>
+                            <TextBlock Text="S.Start" ToolTip="Slave Start Position (mm) - Calculated automatically"/>
+                        </DataGridTextColumn.Header>
+                    </DataGridTextColumn>
+
+                    <!-- Slave End (Editable) -->
+                    <DataGridTextColumn Binding="{Binding SlaveVal, StringFormat=F1}" Width="0.7*">
+                        <DataGridTextColumn.Header>
+                            <TextBlock Text="S.End" ToolTip="Slave End Position (mm) or Stroke"/>
+                        </DataGridTextColumn.Header>
+                    </DataGridTextColumn>
+
+                    <!-- Motion Law -->
+                    <DataGridComboBoxColumn Width="1.5*" SelectedItemBinding="{Binding MotionLaw}" ItemsSource="{Binding Source={StaticResource MotionLawEnum}}">
+                        <DataGridComboBoxColumn.Header>
+                            <TextBlock Text="Law" ToolTip="Motion Law / Curve Type"/>
+                        </DataGridComboBoxColumn.Header>
+                    </DataGridComboBoxColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+    </Border>
+</UserControl>
