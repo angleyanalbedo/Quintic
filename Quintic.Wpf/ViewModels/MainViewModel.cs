@@ -13,6 +13,7 @@ namespace Quintic.Wpf.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
+        public ToolbarViewModel ToolbarVM { get; set; }
         public SegmentTableViewModel SegmentTableVM { get; set; }
         public CamPlotViewModel CamPlotVM { get; set; }
         
@@ -32,6 +33,7 @@ namespace Quintic.Wpf.ViewModels
             SegmentTableVM.SegmentsChanged += (s, e) => Recalculate();
 
             ExportCsvCommand = new RelayCommand(ExecuteExportCsv);
+            ToolbarVM = new ToolbarViewModel(ExportCsvCommand);
 
             Recalculate();
         }

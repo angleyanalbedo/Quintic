@@ -15,24 +15,34 @@
         <vm:MainViewModel/>
     </Window.DataContext>
 
-    <Grid Margin="5">
-        <Grid.ColumnDefinitions>
-            <!-- Left Sidebar: Data Grid (Area A) -->
-            <ColumnDefinition Width="420" MinWidth="300" MaxWidth="600"/>
-            <!-- Splitter -->
-            <ColumnDefinition Width="Auto"/>
-            <!-- Right Content: Plot Area -->
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Toolbar -->
+            <RowDefinition Height="*"/>    <!-- Content -->
+        </Grid.RowDefinitions>
 
-        <!-- Area A: Data Grid (Left Sidebar) -->
-        <views:SegmentTableView Grid.Column="0" DataContext="{Binding SegmentTableVM}"/>
+        <!-- Toolbar -->
+        <views:ToolbarView Grid.Row="0" DataContext="{Binding ToolbarVM}"/>
 
-        <!-- Splitter (Vertical) -->
-        <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="Transparent" ShowsPreview="True"/>
+        <!-- Main Content -->
+        <Grid Grid.Row="1" Margin="5">
+            <Grid.ColumnDefinitions>
+                <!-- Left Sidebar: Data Grid (Area A) -->
+                <ColumnDefinition Width="420" MinWidth="300" MaxWidth="600"/>
+                <!-- Splitter -->
+                <ColumnDefinition Width="Auto"/>
+                <!-- Right Content: Plot Area -->
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-        <!-- Right Content: Plots -->
-        <views:CamPlotView Grid.Column="2" DataContext="{Binding CamPlotVM}"/>
+            <!-- Area A: Data Grid (Left Sidebar) -->
+            <views:SegmentTableView Grid.Column="0" DataContext="{Binding SegmentTableVM}"/>
 
+            <!-- Splitter (Vertical) -->
+            <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="Transparent" ShowsPreview="True"/>
+
+            <!-- Right Content: Plots -->
+            <views:CamPlotView Grid.Column="2" DataContext="{Binding CamPlotVM}"/>
+        </Grid>
     </Grid>
 </Window>
