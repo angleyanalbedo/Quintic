@@ -1,131 +1,80 @@
-# Industrial Motion Kernel Architecture (Phase 3)
+# Quintic Architecture: From Python MVP to C# WPF Professional Tool
 
-This document outlines the **VDI 2143 Compliant Motion Kernel (Advanced)** architecture for the Quintic project. This design shifts from a simple "Point Table" to a sophisticated **Motion Profile Compiler** architecture, capable of handling relative coordinates, time-based definitions, and complex boundary conditions.
+## 1. Overview
+Quintic has evolved from a web-based MVP (Python/React) into a high-performance desktop application (C#/WPF) targeting industrial automation professionals. This document captures the architectural decisions and migration path.
 
-## 1. Core Philosophy: Definition vs. Compilation
+## 2. The Python MVP (Legacy)
+**Goal:** Validated the core mathematical kernel and concept of "VDI 2143 Cam Editor".
 
-To support industrial flexibility (like "FlexProfile"), we decouple **User Intent** from **Mathematical Execution**.
+### Tech Stack
+- **Backend:** Python 3.11 + FastAPI + NumPy (Vectorized Math).
+- **Frontend:** React + TypeScript + Recharts.
+- **Data Flow:** JSON (REST API) -> NumPy Calculation -> JSON Response.
 
-- **Profile Definition (The "Source Code"):**
-  - Flexible, relative, and potentially ambiguous.
-  - Examples: "Move 50mm relative to last position", "Dwell for 100ms".
-  - Defined by the User / Wizard.
+### Key Components
+1.  **Kernel (quintic/kernels/*.py)**:
+    - `Polynomial5`: Standard 5th-order polynomial ($s = 10\tau^3 - 15\tau^4 + 6\tau^5$).
+    - `Cycloidal`: Bestehorn sinusoid for high-speed low-vibration.
+    - `ModifiedTrapezoid`: 7th-order approximation for limited jerk.
+2.  **Compiler (quintic/services/calculator.py)**:
+    - Resolves "Relative" coordinates to "Absolute".
+    - Converts "Time Duration" to "Master Angle" based on global velocity.
+    - Stitches segments together (End $V_{prev} \to$ Start $V_{next}$).
 
-- **Profile Compilation (The "Compiler"):**
-  - Resolves all ambiguities.
-  - Converts Time -> Master Degrees.
-  - Converts Relative -> Absolute Coordinates.
-  - Validates continuity and physical limits.
-  - Produces a **Normalized Execution Profile**.
+## 3. The C# WPF Professional Tool (Current)
+**Goal:** High-performance, low-latency, native Windows integration (COM/OLE for Excel later), and DirectX/Hardware acceleration potential for massive datasets.
 
-- **Math Kernel (The "CPU"):**
-  - Dumb but fast.
-  - Only understands Absolute Coordinates and Normalized Time ($0..1$).
-  - Calculates $S, V, A, J$ using pure math functions (e.g., Polynomial 5th Order).
+### Tech Stack
+- **Framework:** .NET 6+ / WPF (Windows Presentation Foundation).
+- **UI Pattern:** MVVM (Model-View-ViewModel) + Command Pattern.
+- **Math Library:** Ported Python Kernels to C# + `MathNet.Numerics` (future solver).
+- **Visualization:** `OxyPlot.Wpf` (Direct2D/Hardware Rendering).
 
----
+### Architecture Layers
 
-## 2. Key Concepts & Data Structures
+#### Layer 1: Core (Pure Logic)
+*Namespace: `Quintic.Wpf.Core`*
+- **Models:** `Segment`, `ProjectConfig`, `CamPoint`.
+    - **Smart Segments:** `INotifyPropertyChanged` built-in. Changing `MasterEnd` triggers recalculation immediately.
+- **Kernels:** `IMotionKernel` interface.
+    - `Polynomial5.cs`
+    - `Cycloidal.cs`
+    - `ModifiedTrapezoid.cs`
+    - `ConstantVelocity.cs`
+    - `Dwell.cs`
+- **Services:**
+    - `CamCalculator`: Static stateless service. Takes `List<Segment>` and returns `CalculationResponse`.
+    - `CsvExporter`: Generates industrial standard CSV points.
 
-### 2.1 Reference Systems (Dual Domain)
-The kernel supports switching the reference domain for any motion segment.
+#### Layer 2: ViewModel (Application State)
+*Namespace: `Quintic.Wpf.ViewModels`*
+- **MainViewModel:**
+    - Holds the `ObservableCollection<Segment>`.
+    - Subscribes to `CollectionChanged` and `PropertyChanged` events.
+    - **Debouncing:** (Future optimization) Throttles recalculation requests for very fast typing.
+    - **OxyPlot Models:** Manages `PlotModel` instances for `S` and `V/A/J` charts.
 
-- **Master Absolute (`MasterAbsolute`):** Standard cam definition. Segment ends at a specific master angle (e.g., $180^\circ$).
-- **Master Relative (`MasterRelative`):** Segment duration is a delta from the previous end (e.g., $+90^\circ$).
-- **Time Duration (`TimeDuration`):** Segment duration is defined in seconds/milliseconds. The compiler uses the global `MasterVelocity` to convert this to master degrees.
+#### Layer 3: View (Presentation)
+*Namespace: `Quintic.Wpf.Views`*
+- **MainWindow.xaml:**
+    - **Left Sidebar:** `DataGrid` for precision input.
+    - **Right Canvas:** `PlotView` for macro visualization.
+    - **Theme:** `DarkTheme.xaml` (Dictionary) for professional "Dark Mode" look.
 
-### 2.2 Coordinate Modes
-- **Absolute (`Absolute`):** The Slave Axis moves to a specific position (e.g., $100mm$).
-- **Relative (`Relative`):** The Slave Axis moves by a delta distance (e.g., $+20mm$).
+## 4. Migration Strategy (Python -> C#)
+| Component | Python (Old) | C# (New) | Status |
+| :--- | :--- | :--- | :--- |
+| **Math Kernel** | NumPy (Vectorized) | C# Double Precision Loop | ✅ Done |
+| **Compiler** | `resolve_coordinates` | `CamCalculator.ResolveCoordinates` | ✅ Done |
+| **API** | FastAPI (REST) | In-Memory Direct Call | ✅ Done |
+| **UI** | React (DOM) | WPF (DirectX/GDI+) | ✅ Done |
+| **Plotting** | Recharts (SVG) | OxyPlot (Canvas) | ✅ Done |
 
-### 2.3 Execution Modes
-- **One Shot (`OneShot`):** Profile runs once. Velocity must be 0 at start and end.
-- **Cyclic (`Cyclic`):** Profile repeats. End position/velocity must match Start position/velocity.
-- **Cyclic Appending (`CyclicAppending`):** (Future) The end position of cycle $N$ becomes the start position of cycle $N+1$ (e.g., continuous feeding).
-
----
-
-## 3. Data Schema (JSON Structure)
-
-The backend API accepts a `Project` object.
-
-```json
-{
-  "config": {
-    "master_velocity": 60.0, // RPM (Reference for Time <-> Master conversion)
-    "resolution": 360,
-    "execution_mode": "OneShot", // or "Cyclic"
-    "units_master": "deg",
-    "units_slave": "mm"
-  },
-  "segments": [
-    {
-      "id": "seg_1",
-      "motion_law": "Polynomial5",
-      "reference_type": "Master", // or "Time"
-      "coordinate_mode": "Absolute", // or "Relative"
-      "master_val": 90.0, // Absolute Position
-      "slave_val": 50.0   // Absolute Position
-    },
-    {
-      "id": "seg_2",
-      "motion_law": "Polynomial5",
-      "reference_type": "Time",
-      "coordinate_mode": "Relative",
-      "master_val": 0.5,  // Duration in Seconds (Compiler converts to Deg)
-      "slave_val": 0.0    // Relative move (Dwell)
-    }
-  ],
-  "events": [
-    {
-      "id": "evt_1",
-      "trigger_master_pos": 45.0,
-      "action": "SetBit:CutEnable"
-    }
-  ]
-}
-```
+## 5. Future: The "Solver" Engine
+The next architectural leap is implementing the **Global Continuity Solver**.
+- **Problem:** Currently, segments calculate velocity based *only* on their own boundary conditions (0 by default).
+- **Solution:** A system of linear equations ($Ax = B$) to solve for boundary velocities $v_i$ such that acceleration is continuous across all $i$ points.
+- **Implementation:** Will use `MathNet.Numerics.LinearAlgebra` to solve the tridiagonal matrix (Spline Interpolation).
 
 ---
-
-## 4. Processing Pipeline
-
-### Step 1: Resolution (Compiler)
-The `CamCalculator._resolve_coordinates` function iterates through the segments:
-
-1.  **Initialize:** `CurrentMaster = 0`, `CurrentSlave = 0`.
-2.  **Iterate Segments:**
-    - If `TimeDuration`: Calculate `DeltaMaster = Duration * Speed`.
-    - If `Relative`: `Target = Current + Value`.
-    - If `Absolute`: `Target = Value`.
-3.  **Store Computed Values:** Populate `computed_master_start/end` and `computed_slave_start/end` in the segment object.
-
-### Step 2: Validation
-- Check for negative durations.
-- Check for master position overlaps.
-- (Future) Check against `PhysicalLimits` (Max Velocity/Accel).
-
-### Step 3: Kernel Execution
-- The `CamCalculator` iterates through the **Resolved Segments**.
-- It instantiates the appropriate Math Kernel (e.g., `Polynomial5`).
-- It generates the discrete point table $(S, V, A, J)$.
-- It stitches the segments together, handling boundary points to avoid duplication.
-
----
-
-## 5. Future Extensions
-
-1.  **Application Wizards:**
-    - Flying Shear Wizard: Generates the Project JSON based on product length and cut speed.
-    - Rotary Knife Wizard: Generates synchronization profiles.
-    - These wizards sit *above* the API and output standard JSON.
-
-2.  **Hardware Export:**
-    - The "Normalized Execution Profile" (Result of Step 3) can be exported to:
-      - CSV (Generic)
-      - PLC Data Block (Siemens S7)
-      - L5K/L5X (Allen-Bradley)
-      - XML (Beckhoff)
-
-3.  **Multi-Axis Synchronization:**
-    - Defining `Slave` as another `Master` for a second profile (Cascading Cams).
+*Documented on: March 25, 2026*
