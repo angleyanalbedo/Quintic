@@ -35,8 +35,40 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Area A: Data Grid (Left Sidebar) -->
-            <views:SegmentTableView Grid.Column="0" DataContext="{Binding SegmentTableVM}"/>
+            <!-- Area A: Left Sidebar (Data Grid + Limits) -->
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <views:SegmentTableView Grid.Row="0" DataContext="{Binding SegmentTableVM}"/>
+
+                <!-- Physical Limits Configuration -->
+                <Border Grid.Row="1" Background="{StaticResource Brush.Control.Background}" Margin="0,5,0,0" Padding="10" CornerRadius="2">
+                    <StackPanel>
+                        <TextBlock Text="PHYSICAL LIMITS" FontSize="12" FontWeight="Bold" Foreground="{StaticResource Brush.Text.Secondary}" Margin="0,0,0,10"/>
+                        
+                        <Grid Margin="0,0,0,5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="80"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Max Velocity" VerticalAlignment="Center" Foreground="{StaticResource Brush.Text.Primary}" ToolTip="Maximum allowed velocity (mm/s)"/>
+                            <TextBox Grid.Column="1" Text="{Binding LimitVelocity, UpdateSourceTrigger=PropertyChanged}" Padding="4,2" Background="#222" Foreground="White" BorderThickness="0" VerticalContentAlignment="Center"/>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="80"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Max Accel" VerticalAlignment="Center" Foreground="{StaticResource Brush.Text.Primary}" ToolTip="Maximum allowed acceleration (mm/s²)"/>
+                            <TextBox Grid.Column="1" Text="{Binding LimitAcceleration, UpdateSourceTrigger=PropertyChanged}" Padding="4,2" Background="#222" Foreground="White" BorderThickness="0" VerticalContentAlignment="Center"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </Grid>
 
             <!-- Splitter (Vertical) -->
             <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="Transparent" ShowsPreview="True"/>

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
@@ -55,9 +57,37 @@ namespace Quintic.Wpf.Core.Services
             VAPlotModel.InvalidatePlot(true);
         }
 
-        public void UpdatePlots(CalculationResponse response)
+        public void UpdatePlots(CalculationResponse response, IEnumerable<Segment> segments = null)
         {
             if (SPlotModel == null || VAPlotModel == null) return;
+
+            // Update Control Points (Interactive Design Prep)
+            if (segments != null)
+            {
+                var cpSeries = SPlotModel.Series.OfType<ScatterSeries>().FirstOrDefault();
+                if (cpSeries == null)
+                {
+                    cpSeries = new ScatterSeries
+                    {
+                        Title = "Control Points",
+                        MarkerType = MarkerType.Circle,
+                        MarkerSize = 5,
+                        MarkerFill = OxyColor.Parse("#1A1A1A"),
+                        MarkerStroke = OxyColor.Parse("#3498DB"),
+                        MarkerStrokeThickness = 2
+                    };
+                    SPlotModel.Series.Add(cpSeries);
+                }
+
+                cpSeries.Points.Clear();
+                foreach (var seg in segments)
+                {
+                    if (seg.ComputedMasterEnd.HasValue && seg.ComputedSlaveEnd.HasValue)
+                    {
+                        cpSeries.Points.Add(new ScatterPoint(seg.ComputedMasterEnd.Value, seg.ComputedSlaveEnd.Value));
+                    }
+                }
+            }
 
             // Update S Series
             var sSeries = SPlotModel.Series[0] as LineSeries;

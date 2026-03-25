@@ -68,9 +68,9 @@ namespace Quintic.Wpf.ViewModels
             ResetViewCommand = new RelayCommand(o => _plotService.ResetAxes());
         }
 
-        public void UpdatePlots(CalculationResponse response)
+        public void UpdatePlots(CalculationResponse response, IEnumerable<Segment> segments = null)
         {
-            _plotService.UpdatePlots(response);
+            _plotService.UpdatePlots(response, segments);
         }
 
         public void UpdateLimits(double maxV, double maxA)

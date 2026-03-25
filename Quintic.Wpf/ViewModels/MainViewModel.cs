@@ -253,7 +253,7 @@ namespace Quintic.Wpf.ViewModels
             _lastCalculation = CamCalculator.CalculateProject(SegmentTableVM.Segments.ToList(), Config);
             
             // 3. Update Plots
-            CamPlotVM.UpdatePlots(_lastCalculation);
+            CamPlotVM.UpdatePlots(_lastCalculation, SegmentTableVM.Segments);
             CamPlotVM.UpdateLimits(LimitVelocity, LimitAcceleration);
         }
 
