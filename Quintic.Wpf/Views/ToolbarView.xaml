@@ -53,6 +53,10 @@
                         <MenuItem Header="Open Project..." Command="{Binding OpenProjectCommand}"/>
                         <MenuItem Header="Save Project..." Command="{Binding SaveProjectCommand}"/>
                     </MenuItem>
+                    <MenuItem Header="Edit">
+                        <MenuItem Header="Undo" Command="{Binding UndoCommand}" InputGestureText="Ctrl+Z"/>
+                        <MenuItem Header="Redo" Command="{Binding RedoCommand}" InputGestureText="Ctrl+Y"/>
+                    </MenuItem>
                     <MenuItem Header="Export">
                         <MenuItem Header="To CSV..." Command="{Binding ExportCsvCommand}"/>
                     </MenuItem>

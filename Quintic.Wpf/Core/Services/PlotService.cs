@@ -1,6 +1,7 @@
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
+using OxyPlot.Annotations;
 using Quintic.Wpf.Core.Models;
 
 namespace Quintic.Wpf.Core.Services
@@ -34,6 +35,23 @@ namespace Quintic.Wpf.Core.Services
                     lineSeries.IsVisible = isVisible;
                 }
             }
+            VAPlotModel.InvalidatePlot(true);
+        }
+
+        public void UpdateLimitLines(double maxV, double maxA)
+        {
+            VAPlotModel.Annotations.Clear();
+
+            // Velocity Limits (+/-)
+            var vLimitColor = OxyColor.FromAColor(60, OxyColors.Red);
+            VAPlotModel.Annotations.Add(new LineAnnotation { Type = LineAnnotationType.Horizontal, Y = maxV, Color = vLimitColor, StrokeThickness = 1, LineStyle = LineStyle.Dash, YAxisKey = "V", Text = "V Max" });
+            VAPlotModel.Annotations.Add(new LineAnnotation { Type = LineAnnotationType.Horizontal, Y = -maxV, Color = vLimitColor, StrokeThickness = 1, LineStyle = LineStyle.Dash, YAxisKey = "V" });
+
+            // Acceleration Limits (+/-)
+            var aLimitColor = OxyColor.FromAColor(60, OxyColors.OrangeRed);
+            VAPlotModel.Annotations.Add(new LineAnnotation { Type = LineAnnotationType.Horizontal, Y = maxA, Color = aLimitColor, StrokeThickness = 1, LineStyle = LineStyle.Dash, YAxisKey = "A", Text = "A Max" });
+            VAPlotModel.Annotations.Add(new LineAnnotation { Type = LineAnnotationType.Horizontal, Y = -maxA, Color = aLimitColor, StrokeThickness = 1, LineStyle = LineStyle.Dash, YAxisKey = "A" });
+
             VAPlotModel.InvalidatePlot(true);
         }
 

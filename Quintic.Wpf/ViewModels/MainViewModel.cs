@@ -20,6 +20,8 @@ namespace Quintic.Wpf.ViewModels
         {
             public ProjectConfig Config { get; set; }
             public List<Segment> Segments { get; set; }
+            public double LimitVelocity { get; set; }
+            public double LimitAcceleration { get; set; }
         }
 
         public ToolbarViewModel ToolbarVM { get; set; }
@@ -27,9 +29,32 @@ namespace Quintic.Wpf.ViewModels
         public CamPlotViewModel CamPlotVM { get; set; }
         
         public ProjectConfig Config { get; set; }
+        
+        // Limits
+        private double _limitVelocity = 1000;
+        public double LimitVelocity
+        {
+            get => _limitVelocity;
+            set { _limitVelocity = value; OnPropertyChanged(); Recalculate(); }
+        }
+
+        private double _limitAcceleration = 10000;
+        public double LimitAcceleration
+        {
+            get => _limitAcceleration;
+            set { _limitAcceleration = value; OnPropertyChanged(); Recalculate(); }
+        }
+
+        // History
+        private readonly List<string> _history = new List<string>();
+        private int _historyIndex = -1;
+        private bool _isNavigatingHistory = false;
+
         public ICommand SaveProjectCommand { get; private set; }
         public ICommand OpenProjectCommand { get; private set; }
         public ICommand ExportCsvCommand { get; private set; }
+        public ICommand UndoCommand { get; private set; }
+        public ICommand RedoCommand { get; private set; }
 
         private CalculationResponse _lastCalculation;
 
@@ -46,8 +71,10 @@ namespace Quintic.Wpf.ViewModels
             SaveProjectCommand = new RelayCommand(ExecuteSaveProject);
             OpenProjectCommand = new RelayCommand(ExecuteOpenProject);
             ExportCsvCommand = new RelayCommand(ExecuteExportCsv);
+            UndoCommand = new RelayCommand(ExecuteUndo, o => _historyIndex > 0);
+            RedoCommand = new RelayCommand(ExecuteRedo, o => _historyIndex < _history.Count - 1);
             
-            ToolbarVM = new ToolbarViewModel(SaveProjectCommand, OpenProjectCommand, ExportCsvCommand);
+            ToolbarVM = new ToolbarViewModel(SaveProjectCommand, OpenProjectCommand, ExportCsvCommand, UndoCommand, RedoCommand);
 
             Recalculate();
         }
@@ -66,7 +93,9 @@ namespace Quintic.Wpf.ViewModels
                 var projectState = new ProjectStateDto
                 {
                     Config = this.Config,
-                    Segments = this.SegmentTableVM.Segments.ToList()
+                    Segments = this.SegmentTableVM.Segments.ToList(),
+                    LimitVelocity = this.LimitVelocity,
+                    LimitAcceleration = this.LimitAcceleration
                 };
 
                 var options = new JsonSerializerOptions { WriteIndented = true };
@@ -88,23 +117,81 @@ namespace Quintic.Wpf.ViewModels
                 try
                 {
                     var jsonString = File.ReadAllText(openFileDialog.FileName);
-                    var projectState = JsonSerializer.Deserialize<ProjectStateDto>(jsonString);
-
-                    if (projectState != null)
-                    {
-                        this.Config = projectState.Config;
-                        this.SegmentTableVM.Segments.Clear();
-                        foreach (var seg in projectState.Segments)
-                        {
-                            this.SegmentTableVM.Segments.Add(seg);
-                        }
-                    }
+                    ApplyState(jsonString);
+                    // Clear history after open? Or treat open as a new state?
+                    // Let's treat it as a new state in history
                 }
                 catch (Exception)
                 {
                     // Handle error silently or log
                 }
             }
+        }
+
+        private void ExecuteUndo(object obj)
+        {
+            if (_historyIndex > 0)
+            {
+                _isNavigatingHistory = true;
+                _historyIndex--;
+                ApplyState(_history[_historyIndex]);
+                _isNavigatingHistory = false;
+            }
+        }
+
+        private void ExecuteRedo(object obj)
+        {
+            if (_historyIndex < _history.Count - 1)
+            {
+                _isNavigatingHistory = true;
+                _historyIndex++;
+                ApplyState(_history[_historyIndex]);
+                _isNavigatingHistory = false;
+            }
+        }
+
+        private void ApplyState(string jsonString)
+        {
+            var projectState = JsonSerializer.Deserialize<ProjectStateDto>(jsonString);
+
+            if (projectState != null)
+            {
+                this.Config = projectState.Config;
+                this.LimitVelocity = projectState.LimitVelocity;
+                this.LimitAcceleration = projectState.LimitAcceleration;
+
+                this.SegmentTableVM.Segments.Clear();
+                foreach (var seg in projectState.Segments)
+                {
+                    this.SegmentTableVM.Segments.Add(seg);
+                }
+            }
+        }
+
+        private void RecordSnapshot()
+        {
+            if (_isNavigatingHistory) return;
+
+            var state = new ProjectStateDto
+            {
+                Config = this.Config,
+                Segments = this.SegmentTableVM.Segments.ToList(),
+                LimitVelocity = this.LimitVelocity,
+                LimitAcceleration = this.LimitAcceleration
+            };
+            var json = JsonSerializer.Serialize(state);
+
+            // Avoid duplicates
+            if (_historyIndex >= 0 && _historyIndex < _history.Count && _history[_historyIndex] == json) return;
+
+            // Remove future history if we branched off
+            if (_historyIndex < _history.Count - 1)
+            {
+                _history.RemoveRange(_historyIndex + 1, _history.Count - (_historyIndex + 1));
+            }
+
+            _history.Add(json);
+            _historyIndex++;
         }
 
         private void ExecuteExportCsv(object obj)
@@ -126,6 +213,8 @@ namespace Quintic.Wpf.ViewModels
 
         private void Recalculate()
         {
+            RecordSnapshot();
+
             // 1. Update Computed Values in Segments (Business Logic)
             double currentM = 0;
             double currentS = 0;
@@ -165,6 +254,7 @@ namespace Quintic.Wpf.ViewModels
             
             // 3. Update Plots
             CamPlotVM.UpdatePlots(_lastCalculation);
+            CamPlotVM.UpdateLimits(LimitVelocity, LimitAcceleration);
         }
 
 

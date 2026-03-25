@@ -73,6 +73,11 @@ namespace Quintic.Wpf.ViewModels
             _plotService.UpdatePlots(response);
         }
 
+        public void UpdateLimits(double maxV, double maxA)
+        {
+            _plotService.UpdateLimitLines(maxV, maxA);
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
