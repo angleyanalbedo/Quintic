@@ -10,6 +10,25 @@
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="Quintic" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Margin="0,0,20,0" Foreground="{StaticResource Brush.Accent}"/>
                 
+                <!-- File Menu -->
+                <Menu Background="Transparent" VerticalAlignment="Center" Margin="0,0,10,0">
+                    <Menu.Resources>
+                        <Style TargetType="MenuItem">
+                            <Setter Property="Background" Value="{StaticResource Brush.Control.Background}"/>
+                            <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+                        </Style>
+                    </Menu.Resources>
+                    <MenuItem Header="File" Foreground="{StaticResource Brush.Text.Primary}" FontSize="14" Padding="10,5" Background="Transparent">
+                        <MenuItem.Resources>
+                            <Style TargetType="Popup">
+                                <Setter Property="AllowsTransparency" Value="True"/>
+                            </Style>
+                        </MenuItem.Resources>
+                        <MenuItem Header="Open Project..." Command="{Binding OpenProjectCommand}"/>
+                        <MenuItem Header="Save Project..." Command="{Binding SaveProjectCommand}"/>
+                    </MenuItem>
+                </Menu>
+
                 <!-- Export Menu -->
                 <Menu Background="Transparent" VerticalAlignment="Center">
                     <Menu.Resources>

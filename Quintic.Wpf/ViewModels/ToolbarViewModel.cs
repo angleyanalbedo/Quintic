@@ -6,10 +6,14 @@ namespace Quintic.Wpf.ViewModels
 {
     public class ToolbarViewModel : INotifyPropertyChanged
     {
+        public ICommand SaveProjectCommand { get; private set; }
+        public ICommand OpenProjectCommand { get; private set; }
         public ICommand ExportCsvCommand { get; private set; }
 
-        public ToolbarViewModel(ICommand exportCsvCommand)
+        public ToolbarViewModel(ICommand saveProjectCommand, ICommand openProjectCommand, ICommand exportCsvCommand)
         {
+            SaveProjectCommand = saveProjectCommand;
+            OpenProjectCommand = openProjectCommand;
             ExportCsvCommand = exportCsvCommand;
         }
 
