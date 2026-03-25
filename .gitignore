@@ -9,3 +9,4 @@ quintic/schemas/__pycache__/
 **/obj/
 *.user
 *.suo
+.aider*
