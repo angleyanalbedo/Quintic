@@ -5,108 +5,124 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:oxy="http://oxyplot.org/wpf"
         xmlns:vm="clr-namespace:Quintic.Wpf.ViewModels"
+        xmlns:core="clr-namespace:Quintic.Wpf.Core.Models"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="Quintic - Advanced Cam Editor" Height="900" Width="1400"
+        Title="Quintic - Advanced Cam Editor" Height="900" Width="1600"
         Background="{StaticResource Brush.Background}"
         Foreground="{StaticResource Brush.Text.Primary}"
         WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <ObjectDataProvider x:Key="MotionLawEnum" MethodName="GetValues" ObjectType="{x:Type system:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="core:MotionLawType"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </Window.Resources>
 
     <Window.DataContext>
         <vm:MainViewModel/>
     </Window.DataContext>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/> <!-- Top Bar (Optional) -->
-            <RowDefinition Height="*"/>    <!-- Main Content -->
-        </Grid.RowDefinitions>
+    <Grid Margin="5">
+        <Grid.ColumnDefinitions>
+            <!-- Left Sidebar: Data Grid (Area A) -->
+            <ColumnDefinition Width="420" MinWidth="300" MaxWidth="600"/>
+            <!-- Splitter -->
+            <ColumnDefinition Width="Auto"/>
+            <!-- Right Content: Plot Area -->
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-        <!-- Main Content Area -->
-        <Grid Grid.Row="1" Margin="5">
+        <!-- Area A: Data Grid (Left Sidebar) -->
+        <Border Grid.Column="0" Background="{StaticResource Brush.Control.Background}" CornerRadius="2" Padding="0">
+            <DockPanel>
+                <!-- Header Strip -->
+                <Border DockPanel.Dock="Top" Background="{StaticResource Brush.Control.Border}" Padding="10,6" CornerRadius="2,2,0,0">
+                    <DockPanel>
+                         <TextBlock Text="SEGMENT TABLE" FontSize="12" FontWeight="Bold" Foreground="{StaticResource Brush.Text.Secondary}" VerticalAlignment="Center" DockPanel.Dock="Left"/>
+                    </DockPanel>
+                </Border>
+                
+                <DataGrid ItemsSource="{Binding Segments}" 
+                          AutoGenerateColumns="False" 
+                          CanUserAddRows="True" 
+                          CanUserDeleteRows="True"
+                          GridLinesVisibility="Horizontal"
+                          HeadersVisibility="Column"
+                          BorderThickness="0"
+                          RowHeight="28">
+                    <DataGrid.Columns>
+                        <!-- Master Start (Computed, ReadOnly) -->
+                        <DataGridTextColumn Header="M.Start" Binding="{Binding ComputedMasterStart, StringFormat=F1}" Width="0.7*" IsReadOnly="True" Foreground="Gray"/>
+                        
+                        <!-- Master End (Editable) -->
+                        <DataGridTextColumn Header="M.End" Binding="{Binding MasterVal, StringFormat=F1}" Width="0.7*"/>
+                        
+                        <!-- Slave Start (Computed, ReadOnly) -->
+                        <DataGridTextColumn Header="S.Start" Binding="{Binding ComputedSlaveStart, StringFormat=F1}" Width="0.7*" IsReadOnly="True" Foreground="Gray"/>
+                        
+                        <!-- Slave End (Editable) -->
+                        <DataGridTextColumn Header="S.End" Binding="{Binding SlaveVal, StringFormat=F1}" Width="0.7*"/>
+                        
+                        <!-- Motion Law -->
+                        <DataGridComboBoxColumn Header="Law" Width="1.5*" SelectedItemBinding="{Binding MotionLaw}" ItemsSource="{Binding Source={StaticResource MotionLawEnum}}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Border>
+
+        <!-- Splitter (Vertical) -->
+        <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="Transparent" ShowsPreview="True"/>
+
+        <!-- Right Content: Plots -->
+        <Grid Grid.Column="2">
             <Grid.RowDefinitions>
-                <RowDefinition Height="1.2*" MinHeight="150" /> <!-- Data Grid Area (Top) -->
-                <RowDefinition Height="Auto" />    <!-- Splitter -->
-                <RowDefinition Height="3*" MinHeight="200" />    <!-- S Curve (Middle) -->
-                <RowDefinition Height="Auto" />    <!-- Splitter -->
-                <RowDefinition Height="1.5*" MinHeight="100" />  <!-- V/A Curve (Bottom) -->
+                <RowDefinition Height="3*" MinHeight="200"/> <!-- Area B: S Curve (Main) -->
+                <RowDefinition Height="Auto"/>               <!-- Splitter -->
+                <RowDefinition Height="1.5*" MinHeight="150"/> <!-- Area C: V/A/J Curves (Secondary) -->
             </Grid.RowDefinitions>
 
-            <!-- Area A: Data Grid -->
-            <!-- 移除硬边框，使用更微妙的背景区分 -->
-            <Border Grid.Row="0" Background="{StaticResource Brush.Control.Background}" CornerRadius="2" Padding="0">
-                <DockPanel>
-                    <!-- Header Strip -->
-                    <Border DockPanel.Dock="Top" Background="{StaticResource Brush.Control.Border}" Padding="10,4" CornerRadius="2,2,0,0">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="SEGMENT TABLE" FontSize="11" FontWeight="Bold" Foreground="{StaticResource Brush.Text.Secondary}" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Border>
-                    
-                    <DataGrid ItemsSource="{Binding Segments}" 
-                              AutoGenerateColumns="False" 
-                              CanUserAddRows="True" 
-                              CanUserDeleteRows="True"
-                              GridLinesVisibility="Horizontal"
-                              HeadersVisibility="Column"
-                              BorderThickness="0">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Master Start (°)" Binding="{Binding MasterStart}" Width="*"/>
-                            <DataGridTextColumn Header="Master End (°)" Binding="{Binding MasterEnd}" Width="*"/>
-                            <DataGridTextColumn Header="Slave Start (mm)" Binding="{Binding SlaveStart}" Width="*"/>
-                            <DataGridTextColumn Header="Slave End (mm)" Binding="{Binding SlaveEnd}" Width="*"/>
-                            <DataGridComboBoxColumn Header="Motion Law" Width="1.5*">
-                                <DataGridComboBoxColumn.ItemsSource>
-                                    <x:Array Type="{x:Type system:String}">
-                                        <system:String>Dwell</system:String>
-                                        <system:String>Constant Velocity</system:String>
-                                        <system:String>Quintic (3-4-5)</system:String>
-                                        <system:String>Modified Sine</system:String>
-                                        <system:String>Trapezoidal</system:String>
-                                    </x:Array>
-                                </DataGridComboBoxColumn.ItemsSource>
-                            </DataGridComboBoxColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </DockPanel>
-            </Border>
-
-            <!-- Splitter 1 -->
-            <GridSplitter Grid.Row="1" Height="6" HorizontalAlignment="Stretch" Background="Transparent" ShowsPreview="True" VerticalAlignment="Center"/>
-
             <!-- Area B: S Curve (Displacement) -->
-            <Border Grid.Row="2" Background="{StaticResource Brush.PlotBackground}" CornerRadius="2">
+            <Border Grid.Row="0" Background="{StaticResource Brush.PlotBackground}" CornerRadius="2" Margin="0,0,0,0">
                 <Grid>
                     <oxy:PlotView Model="{Binding SPlotModel}" Background="Transparent" />
+                    
                     <!-- HUD Overlay -->
-                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Margin="15" Orientation="Horizontal">
-                        <Border Width="10" Height="10" Background="{StaticResource Brush.Accent}" CornerRadius="5" Margin="0,0,5,0"/>
-                        <TextBlock Text="Displacement (S)" Foreground="{StaticResource Brush.Accent}" FontWeight="SemiBold"/>
+                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Margin="20" Orientation="Horizontal">
+                        <Border Width="12" Height="12" Background="{StaticResource Brush.Accent}" CornerRadius="6" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Displacement (S)" Foreground="{StaticResource Brush.Accent}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <!-- Splitter 2 -->
-            <GridSplitter Grid.Row="3" Height="6" HorizontalAlignment="Stretch" Background="Transparent" ShowsPreview="True" VerticalAlignment="Center"/>
+            <!-- Splitter (Horizontal) -->
+            <GridSplitter Grid.Row="1" Height="6" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="Transparent" ShowsPreview="True"/>
 
-            <!-- Area C: V/A Curves (Derivatives) -->
-            <Border Grid.Row="4" Background="{StaticResource Brush.PlotBackground}" CornerRadius="2">
+            <!-- Area C: V/A/J Curves (Derivatives) -->
+            <Border Grid.Row="2" Background="{StaticResource Brush.PlotBackground}" CornerRadius="2">
                 <Grid>
                     <oxy:PlotView Model="{Binding VAPlotModel}" Background="Transparent" />
+                    
                     <!-- HUD Overlay -->
-                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Margin="15">
+                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Margin="20" Background="#80111111">
                          <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                            <Border Width="10" Height="10" Background="{StaticResource Brush.Success}" CornerRadius="5" Margin="0,0,5,0"/>
-                            <TextBlock Text="Velocity (V)" Foreground="{StaticResource Brush.Success}" FontWeight="SemiBold"/>
+                            <Border Width="10" Height="10" Background="{StaticResource Brush.Success}" CornerRadius="5" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Velocity (V)" Foreground="{StaticResource Brush.Success}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                            <Border Width="10" Height="10" Background="{StaticResource Brush.Warning}" CornerRadius="5" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Acceleration (A)" Foreground="{StaticResource Brush.Warning}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <Border Width="10" Height="10" Background="{StaticResource Brush.Warning}" CornerRadius="5" Margin="0,0,5,0"/>
-                            <TextBlock Text="Acceleration (A)" Foreground="{StaticResource Brush.Warning}" FontWeight="SemiBold"/>
+                            <Border Width="10" Height="10" Background="#9B59B6" CornerRadius="5" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Jerk (J)" Foreground="#9B59B6" FontWeight="SemiBold" VerticalAlignment="Center"/>
                         </StackPanel>
                     </StackPanel>
                 </Grid>
             </Border>
-
         </Grid>
+
     </Grid>
 </Window>
