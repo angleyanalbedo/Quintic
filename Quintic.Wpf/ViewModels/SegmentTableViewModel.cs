@@ -3,7 +3,9 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Input;
 using Quintic.Wpf.Core.Models;
+using Quintic.Wpf.Core.Commands;
 
 namespace Quintic.Wpf.ViewModels
 {
@@ -11,11 +13,24 @@ namespace Quintic.Wpf.ViewModels
     {
         public ObservableCollection<Segment> Segments { get; set; }
 
+        private Segment _selectedSegment;
+        public Segment SelectedSegment
+        {
+            get => _selectedSegment;
+            set { _selectedSegment = value; OnPropertyChanged(); }
+        }
+
+        public ICommand AddSegmentCommand { get; private set; }
+        public ICommand RemoveSegmentCommand { get; private set; }
+
         // Event to notify parent when recalculation is needed
         public event EventHandler SegmentsChanged;
 
         public SegmentTableViewModel()
         {
+            AddSegmentCommand = new RelayCommand(ExecuteAddSegment);
+            RemoveSegmentCommand = new RelayCommand(ExecuteRemoveSegment, CanExecuteRemoveSegment);
+
             Segments = new ObservableCollection<Segment>
             {
                 new Segment { MasterVal = 90, SlaveVal = 50, MotionLaw = MotionLawType.Polynomial5, CoordinateMode = CoordinateMode.Absolute },
@@ -49,6 +64,40 @@ namespace Quintic.Wpf.ViewModels
         {
             if (e.PropertyName.StartsWith("Computed")) return;
             SegmentsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void ExecuteAddSegment(object obj)
+        {
+            var newSeg = new Segment
+            {
+                MotionLaw = MotionLawType.Polynomial5,
+                CoordinateMode = CoordinateMode.Relative,
+                MasterVal = 90,
+                SlaveVal = 0
+            };
+
+            if (SelectedSegment != null)
+            {
+                int index = Segments.IndexOf(SelectedSegment);
+                Segments.Insert(index + 1, newSeg);
+            }
+            else
+            {
+                Segments.Add(newSeg);
+            }
+        }
+
+        private void ExecuteRemoveSegment(object obj)
+        {
+            if (SelectedSegment != null)
+            {
+                Segments.Remove(SelectedSegment);
+            }
+        }
+
+        private bool CanExecuteRemoveSegment(object obj)
+        {
+            return SelectedSegment != null && Segments.Count > 1;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

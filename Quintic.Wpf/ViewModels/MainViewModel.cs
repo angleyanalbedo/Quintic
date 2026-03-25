@@ -80,6 +80,17 @@ namespace Quintic.Wpf.ViewModels
                 currentS = seg.ComputedSlaveEnd ?? 0;
             }
 
+            // Validation: Check for monotonic master position
+            foreach (var seg in SegmentTableVM.Segments)
+            {
+                if (seg.ComputedMasterEnd <= seg.ComputedMasterStart)
+                {
+                    // Invalid segment configuration (End <= Start)
+                    // Stop calculation to prevent crash or invalid graph
+                    return;
+                }
+            }
+
             // 2. Calculate Profile
             _lastCalculation = CamCalculator.CalculateProject(SegmentTableVM.Segments.ToList(), Config);
             

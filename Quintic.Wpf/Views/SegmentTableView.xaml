@@ -22,17 +22,28 @@
             <Border DockPanel.Dock="Top" Background="{StaticResource Brush.Control.Border}" Padding="10,6" CornerRadius="2,2,0,0">
                 <DockPanel>
                      <TextBlock Text="SEGMENT TABLE" FontSize="12" FontWeight="Bold" Foreground="{StaticResource Brush.Text.Secondary}" VerticalAlignment="Center" DockPanel.Dock="Left"/>
+                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                         <Button Command="{Binding AddSegmentCommand}" Content="+" Width="24" Height="20" Margin="5,0,0,0" Background="Transparent" Foreground="{StaticResource Brush.Text.Primary}" BorderThickness="0" ToolTip="Add Segment"/>
+                         <Button Command="{Binding RemoveSegmentCommand}" Content="-" Width="24" Height="20" Margin="0,0,0,0" Background="Transparent" Foreground="{StaticResource Brush.Text.Primary}" BorderThickness="0" ToolTip="Remove Segment"/>
+                     </StackPanel>
                 </DockPanel>
             </Border>
             
             <DataGrid ItemsSource="{Binding Segments}" 
+                      SelectedItem="{Binding SelectedSegment}"
                       AutoGenerateColumns="False" 
-                      CanUserAddRows="True" 
-                      CanUserDeleteRows="True"
+                      CanUserAddRows="False" 
+                      CanUserDeleteRows="False"
                       GridLinesVisibility="Horizontal"
                       HeadersVisibility="Column"
                       BorderThickness="0"
                       RowHeight="28">
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Insert Segment" Command="{Binding AddSegmentCommand}"/>
+                        <MenuItem Header="Remove Segment" Command="{Binding RemoveSegmentCommand}"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
                 <DataGrid.Columns>
                     <!-- Master Start (Computed, ReadOnly) -->
                     <DataGridTextColumn Binding="{Binding ComputedMasterStart, StringFormat=F1}" Width="0.7*" IsReadOnly="True" Foreground="Gray">
