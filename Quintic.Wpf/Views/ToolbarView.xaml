@@ -5,47 +5,56 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="40" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style TargetType="MenuItem">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Grid>
+                            <Border x:Name="Border" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter ContentSource="Header" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
+                                <Border Background="{StaticResource Brush.Control.Background}" BorderBrush="{StaticResource Brush.Control.Border}" BorderThickness="1" Padding="2">
+                                    <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Role" Value="SubmenuItem">
+                                <Setter TargetName="Popup" Property="Visibility" Value="Collapsed"/>
+                                <Setter Property="Padding" Value="12,6"/>
+                                <Setter Property="FontSize" Value="12"/>
+                            </Trigger>
+                            <Trigger Property="Role" Value="TopLevelHeader">
+                                <Setter Property="Padding" Value="10,5"/>
+                                <Setter Property="Background" Value="Transparent"/>
+                            </Trigger>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#33FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
     <Border Background="{StaticResource Brush.Control.Background}" BorderBrush="{StaticResource Brush.Control.Border}" BorderThickness="0,0,0,1" Padding="10,0">
         <Grid>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="Quintic" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Margin="0,0,20,0" Foreground="{StaticResource Brush.Accent}"/>
                 
-                <!-- File Menu -->
-                <Menu Background="Transparent" VerticalAlignment="Center" Margin="0,0,10,0">
-                    <Menu.Resources>
-                        <Style TargetType="MenuItem">
-                            <Setter Property="Background" Value="{StaticResource Brush.Control.Background}"/>
-                            <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
-                        </Style>
-                    </Menu.Resources>
-                    <MenuItem Header="File" Foreground="{StaticResource Brush.Text.Primary}" FontSize="14" Padding="10,5" Background="Transparent">
-                        <MenuItem.Resources>
-                            <Style TargetType="Popup">
-                                <Setter Property="AllowsTransparency" Value="True"/>
-                            </Style>
-                        </MenuItem.Resources>
+                <Menu Background="Transparent" VerticalAlignment="Center">
+                    <MenuItem Header="File">
                         <MenuItem Header="Open Project..." Command="{Binding OpenProjectCommand}"/>
                         <MenuItem Header="Save Project..." Command="{Binding SaveProjectCommand}"/>
                     </MenuItem>
-                </Menu>
-
-                <!-- Export Menu -->
-                <Menu Background="Transparent" VerticalAlignment="Center">
-                    <Menu.Resources>
-                        <Style TargetType="MenuItem">
-                            <Setter Property="Background" Value="{StaticResource Brush.Control.Background}"/>
-                            <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
-                        </Style>
-                    </Menu.Resources>
-                    <MenuItem Header="Export" Foreground="{StaticResource Brush.Text.Primary}" FontSize="14" Padding="10,5" Background="Transparent">
-                        <MenuItem.Resources>
-                            <Style TargetType="Popup">
-                                <Setter Property="AllowsTransparency" Value="True"/>
-                            </Style>
-                        </MenuItem.Resources>
+                    <MenuItem Header="Export">
                         <MenuItem Header="To CSV..." Command="{Binding ExportCsvCommand}"/>
-                        <!-- Future formats can be added here, e.g.: -->
-                        <!-- <MenuItem Header="To JSON..." Command="{Binding ExportJsonCommand}"/> -->
                     </MenuItem>
                 </Menu>
             </StackPanel>
