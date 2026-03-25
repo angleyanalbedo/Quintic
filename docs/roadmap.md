@@ -14,6 +14,10 @@ This document outlines the architectural evolution of the Quintic Cam Editor, fr
 - **Scope:** Multi-Segment Support, Vectorized Kernels.
 - **Outcome:** 50x performance boost, clean `api/kernels/services` architecture.
 
+### 2.1 Editor Essentials (Ongoing)
+- **Project Persistence:** Save/Load project state (`.json` / `.quintic`) to preserve segments, config, and view settings.
+- **Undo/Redo Stack:** Essential for trial-and-error design.
+
 ## ✅ Phase 3: Industrial Motion Kernel (Completed)
 **Focus:** VDI 2143 Advanced Definitions
 - **Tech:** Compiler Pattern (Definition vs. Execution).
@@ -44,6 +48,11 @@ This document outlines the architectural evolution of the Quintic Cam Editor, fr
 ### 4.3 Transition Handling (Rounding)
 - **Feature:** "Blend" or "Round" corners between linear segments automatically (e.g., adding a circular or polynomial fillet between two straight lines).
 
+### 4.4 Interactive Design (The "Editor" Experience)
+- **Control Points:** Render draggable handles (white/blue hollow circles) at segment junctions $(M_{end}, S_{end})$.
+- **Real-time Feedback:** Dragging a handle instantly updates the $S$ curve and recalculates $V, A, J$ derivatives.
+- **Boundary Constraints UI:** Expand the segment table to allow explicit input of $V_{start}, V_{end}, A_{start}, A_{end}$ (currently hidden/assumed zero).
+
 ---
 
 ## 🔮 Phase 5: Application Intelligence
@@ -55,7 +64,11 @@ This document outlines the architectural evolution of the Quintic Cam Editor, fr
 - **Cross Sealer (横封):** Input: Pack Depth, Dwell Time. -> Output: Sealing Profile.
 
 ### 5.2 Kinematics & Dynamics Check
-- **Feature:** Integrate Motor & Load Models.
+- **Physical Limits Alarm:**
+    - User sets global limits (e.g., $V_{max} = 1000$ mm/s, $A_{max} = 5g$).
+    - **Visual Feedback:** Draw red horizontal limit lines on $V/A$ plots. Highlight areas exceeding limits in red.
+    - **Table Feedback:** Flag specific segments in the data grid that violate these limits.
+- **Motor Sizing:** Integrate Motor & Load Models.
     - Input: Inertia ($J_{load}$), Friction, Motor Torque Curve ($T_{motor}$).
     - Output: **"Torque Utilization"** chart. Warn user if the cam profile exceeds the motor's physical capability.
 
