@@ -14,6 +14,34 @@
                 <x:Type TypeName="core:MotionLawType"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+
+        <Style x:Key="HeaderButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="2">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#33FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#11FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.3"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
     <Border Background="{StaticResource Brush.Control.Background}" CornerRadius="2" Padding="0">
@@ -23,8 +51,8 @@
                 <DockPanel>
                      <TextBlock Text="SEGMENT TABLE" FontSize="12" FontWeight="Bold" Foreground="{StaticResource Brush.Text.Secondary}" VerticalAlignment="Center" DockPanel.Dock="Left"/>
                      <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                         <Button Command="{Binding AddSegmentCommand}" Content="+" Width="24" Height="20" Margin="5,0,0,0" Background="Transparent" Foreground="{StaticResource Brush.Text.Primary}" BorderThickness="0" ToolTip="Add Segment"/>
-                         <Button Command="{Binding RemoveSegmentCommand}" Content="-" Width="24" Height="20" Margin="0,0,0,0" Background="Transparent" Foreground="{StaticResource Brush.Text.Primary}" BorderThickness="0" ToolTip="Remove Segment"/>
+                         <Button Command="{Binding AddSegmentCommand}" Content="+" Style="{StaticResource HeaderButtonStyle}" Margin="5,0,0,0" ToolTip="Add Segment"/>
+                         <Button Command="{Binding RemoveSegmentCommand}" Content="-" Style="{StaticResource HeaderButtonStyle}" Margin="0,0,0,0" ToolTip="Remove Segment"/>
                      </StackPanel>
                 </DockPanel>
             </Border>
