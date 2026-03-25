@@ -26,13 +26,13 @@
         </Grid.ColumnDefinitions>
 
         <!-- Area A: Data Grid (Left Sidebar) -->
-        <views:SegmentTableView Grid.Column="0"/>
+        <views:SegmentTableView Grid.Column="0" DataContext="{Binding SegmentTableVM}"/>
 
         <!-- Splitter (Vertical) -->
         <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="Transparent" ShowsPreview="True"/>
 
         <!-- Right Content: Plots -->
-        <views:CamPlotView Grid.Column="2"/>
+        <views:CamPlotView Grid.Column="2" DataContext="{Binding CamPlotVM}"/>
 
     </Grid>
 </Window>

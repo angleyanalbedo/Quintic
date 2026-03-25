@@ -1,6 +1,4 @@
-using OxyPlot;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Linq;
@@ -15,11 +13,9 @@ namespace Quintic.Wpf.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        private readonly PlotService _plotService;
-
-        public PlotModel SPlotModel => _plotService.SPlotModel;
-        public PlotModel VAPlotModel => _plotService.VAPlotModel;
-        public ObservableCollection<Segment> Segments { get; set; }
+        public SegmentTableViewModel SegmentTableVM { get; set; }
+        public CamPlotViewModel CamPlotVM { get; set; }
+        
         public ProjectConfig Config { get; set; }
         public ICommand ExportCsvCommand { get; private set; }
 
@@ -27,22 +23,13 @@ namespace Quintic.Wpf.ViewModels
 
         public MainViewModel()
         {
-            _plotService = new PlotService();
             Config = new ProjectConfig { Resolution = 1000 };
+            
+            SegmentTableVM = new SegmentTableViewModel();
+            CamPlotVM = new CamPlotViewModel();
 
-            Segments = new ObservableCollection<Segment>
-            {
-                new Segment { MasterVal = 90, SlaveVal = 50, MotionLaw = MotionLawType.Polynomial5, CoordinateMode = CoordinateMode.Absolute },
-                new Segment { MasterVal = 180, SlaveVal = 50, MotionLaw = MotionLawType.Dwell, CoordinateMode = CoordinateMode.Absolute },
-                new Segment { MasterVal = 360, SlaveVal = 0, MotionLaw = MotionLawType.Polynomial5, CoordinateMode = CoordinateMode.Absolute }
-            };
-
-            // Event Subscriptions
-            Segments.CollectionChanged += OnSegmentsCollectionChanged;
-            foreach (var seg in Segments)
-            {
-                seg.PropertyChanged += OnSegmentPropertyChanged;
-            }
+            // Subscribe to changes in TableVM to trigger Recalculate
+            SegmentTableVM.SegmentsChanged += (s, e) => Recalculate();
 
             ExportCsvCommand = new RelayCommand(ExecuteExportCsv);
 
@@ -66,35 +53,12 @@ namespace Quintic.Wpf.ViewModels
             }
         }
 
-        private void OnSegmentsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.NewItems != null)
-            {
-                foreach (Segment item in e.NewItems)
-                    item.PropertyChanged += OnSegmentPropertyChanged;
-            }
-            if (e.OldItems != null)
-            {
-                foreach (Segment item in e.OldItems)
-                    item.PropertyChanged -= OnSegmentPropertyChanged;
-            }
-            Recalculate();
-        }
-
-        private void OnSegmentPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName.StartsWith("Computed")) return;
-            Recalculate();
-        }
-
         private void Recalculate()
         {
-            _lastCalculation = CamCalculator.CalculateProject(Segments.ToList(), Config);
-            _plotService.UpdatePlots(_lastCalculation);
-
+            // 1. Update Computed Values in Segments (Business Logic)
             double currentM = 0;
             double currentS = 0;
-            foreach (var seg in Segments)
+            foreach (var seg in SegmentTableVM.Segments)
             {
                 seg.ComputedMasterStart = currentM;
                 seg.ComputedSlaveStart = currentS;
@@ -113,6 +77,12 @@ namespace Quintic.Wpf.ViewModels
                 currentM = seg.ComputedMasterEnd ?? 0;
                 currentS = seg.ComputedSlaveEnd ?? 0;
             }
+
+            // 2. Calculate Profile
+            _lastCalculation = CamCalculator.CalculateProject(SegmentTableVM.Segments.ToList(), Config);
+            
+            // 3. Update Plots
+            CamPlotVM.UpdatePlots(_lastCalculation);
         }
 
 
