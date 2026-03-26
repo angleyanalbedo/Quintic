@@ -59,6 +59,7 @@
                     </MenuItem>
                     <MenuItem Header="Export">
                         <MenuItem Header="To CSV..." Command="{Binding ExportCsvCommand}"/>
+                        <MenuItem Header="To Structured Text (ST)..." Command="{Binding ExportStCommand}"/>
                     </MenuItem>
                 </Menu>
             </StackPanel>

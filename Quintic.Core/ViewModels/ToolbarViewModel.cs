@@ -9,14 +9,16 @@ namespace Quintic.Wpf.ViewModels
         public ICommand SaveProjectCommand { get; private set; }
         public ICommand OpenProjectCommand { get; private set; }
         public ICommand ExportCsvCommand { get; private set; }
+        public ICommand ExportStCommand { get; private set; }
         public ICommand UndoCommand { get; private set; }
         public ICommand RedoCommand { get; private set; }
 
-        public ToolbarViewModel(ICommand saveProjectCommand, ICommand openProjectCommand, ICommand exportCsvCommand, ICommand undoCommand, ICommand redoCommand)
+        public ToolbarViewModel(ICommand saveProjectCommand, ICommand openProjectCommand, ICommand exportCsvCommand, ICommand exportStCommand, ICommand undoCommand, ICommand redoCommand)
         {
             SaveProjectCommand = saveProjectCommand;
             OpenProjectCommand = openProjectCommand;
             ExportCsvCommand = exportCsvCommand;
+            ExportStCommand = exportStCommand;
             UndoCommand = undoCommand;
             RedoCommand = redoCommand;
         }
