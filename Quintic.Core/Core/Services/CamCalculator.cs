@@ -176,7 +176,7 @@ namespace Quintic.Wpf.Core.Services
                         kernel = new ConstantVelocity(mStart, mEnd, sStart, sEnd);
                         break;
                     case MotionLawType.Dwell:
-                        kernel = new Dwell(mStart, mEnd, sStart);
+                        kernel = new Dwell(mStart, mEnd, sStart, sEnd);
                         break;
                     case MotionLawType.Polynomial5:
                     default:
