@@ -50,6 +50,7 @@ namespace Quintic.Wpf.ViewModels
         private readonly List<string> _history = new List<string>();
         private int _historyIndex = -1;
         private bool _isNavigatingHistory = false;
+        private bool _isRecalculating = false;
 
         public ICommand SaveProjectCommand { get; private set; }
         public ICommand OpenProjectCommand { get; private set; }
@@ -251,64 +252,74 @@ namespace Quintic.Wpf.ViewModels
 
         private void Recalculate()
         {
-            RecordSnapshot();
+            if (_isRecalculating) return;
+            _isRecalculating = true;
 
-            // 1. Update Computed Values in Segments (Business Logic)
-            double currentM = 0;
-            double currentS = 0;
-            foreach (var seg in SegmentTableVM.Segments)
+            try
             {
-                seg.IsLimitExceeded = false; // Reset flag
-                seg.ComputedMasterStart = currentM;
-                seg.ComputedSlaveStart = currentS;
-                
-                if (seg.CoordinateMode == CoordinateMode.Absolute)
-                {
-                    seg.ComputedMasterEnd = seg.MasterVal;
-                    seg.ComputedSlaveEnd = seg.SlaveVal;
-                }
-                else
-                {
-                    seg.ComputedMasterEnd = currentM + seg.MasterVal;
-                    seg.ComputedSlaveEnd = currentS + seg.SlaveVal;
-                }
-                
-                currentM = seg.ComputedMasterEnd ?? 0;
-                currentS = seg.ComputedSlaveEnd ?? 0;
-            }
+                RecordSnapshot();
 
-            // Validation: Check for monotonic master position
-            foreach (var seg in SegmentTableVM.Segments)
-            {
-                if (seg.ComputedMasterEnd <= seg.ComputedMasterStart)
+                // 1. Update Computed Values in Segments (Business Logic)
+                double currentM = 0;
+                double currentS = 0;
+                foreach (var seg in SegmentTableVM.Segments)
                 {
-                    return;
-                }
-            }
-
-            // 2. Calculate Profile
-            _lastCalculation = CamCalculator.CalculateProject(SegmentTableVM.Segments.ToList(), Config);
-            
-            // 3. Check Limits
-            if (_lastCalculation != null)
-            {
-                foreach (var p in _lastCalculation.Points)
-                {
-                    if (Math.Abs(p.V) > LimitVelocity || Math.Abs(p.A) > LimitAcceleration)
+                    seg.IsLimitExceeded = false; // Reset flag
+                    seg.ComputedMasterStart = currentM;
+                    seg.ComputedSlaveStart = currentS;
+                    
+                    if (seg.CoordinateMode == CoordinateMode.Absolute)
                     {
-                        // Find which segment this point belongs to
-                        var seg = SegmentTableVM.Segments.FirstOrDefault(s => 
-                            p.Theta >= s.ComputedMasterStart && p.Theta <= s.ComputedMasterEnd);
-                        
-                        if (seg != null) seg.IsLimitExceeded = true;
+                        seg.ComputedMasterEnd = seg.MasterVal;
+                        seg.ComputedSlaveEnd = seg.SlaveVal;
+                    }
+                    else
+                    {
+                        seg.ComputedMasterEnd = currentM + seg.MasterVal;
+                        seg.ComputedSlaveEnd = currentS + seg.SlaveVal;
+                    }
+                    
+                    currentM = seg.ComputedMasterEnd ?? 0;
+                    currentS = seg.ComputedSlaveEnd ?? 0;
+                }
+
+                // Validation: Check for monotonic master position
+                foreach (var seg in SegmentTableVM.Segments)
+                {
+                    if (seg.ComputedMasterEnd <= seg.ComputedMasterStart)
+                    {
+                        return;
                     }
                 }
-            }
 
-            // 4. Update Plots
-            CamPlotVM.UpdatePlots(_lastCalculation, SegmentTableVM.Segments);
-            CamPlotVM.UpdateLimits(LimitVelocity, LimitAcceleration);
-            CamPlotVM.HighlightViolations(_lastCalculation, LimitVelocity, LimitAcceleration);
+                // 2. Calculate Profile
+                _lastCalculation = CamCalculator.CalculateProject(SegmentTableVM.Segments.ToList(), Config);
+                
+                // 3. Check Limits
+                if (_lastCalculation != null)
+                {
+                    foreach (var p in _lastCalculation.Points)
+                    {
+                        if (Math.Abs(p.V) > LimitVelocity || Math.Abs(p.A) > LimitAcceleration)
+                        {
+                            // Find which segment this point belongs to
+                            var seg = SegmentTableVM.Segments.FirstOrDefault(s => 
+                                p.Theta >= s.ComputedMasterStart && p.Theta <= s.ComputedMasterEnd);
+                            
+                            if (seg != null) seg.IsLimitExceeded = true;
+                        }
+                    }
+                }
+
+                // 4. Update Plots
+                CamPlotVM.UpdatePlots(_lastCalculation, SegmentTableVM.Segments);
+                CamPlotVM.UpdateLimits(LimitVelocity, LimitAcceleration);
+                CamPlotVM.HighlightViolations(_lastCalculation, LimitVelocity, LimitAcceleration);
+            }
+            finally
+            {
+                _isRecalculating = false;
+            }
         }
 
 

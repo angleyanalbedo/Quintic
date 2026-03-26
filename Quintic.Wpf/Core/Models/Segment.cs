@@ -103,31 +103,66 @@ namespace Quintic.Wpf.Core.Models
         public double? ComputedMasterStart
         {
             get => _computedMasterStart;
-            set { _computedMasterStart = value; OnPropertyChanged(); }
+            set 
+            {
+                if (_computedMasterStart != value)
+                {
+                    _computedMasterStart = value; 
+                    OnPropertyChanged(); 
+                }
+            }
         }
 
         public double? ComputedMasterEnd
         {
             get => _computedMasterEnd;
-            set { _computedMasterEnd = value; OnPropertyChanged(); }
+            set 
+            {
+                if (_computedMasterEnd != value)
+                {
+                    _computedMasterEnd = value; 
+                    OnPropertyChanged(); 
+                }
+            }
         }
 
         public double? ComputedSlaveStart
         {
             get => _computedSlaveStart;
-            set { _computedSlaveStart = value; OnPropertyChanged(); }
+            set 
+            {
+                if (_computedSlaveStart != value)
+                {
+                    _computedSlaveStart = value; 
+                    OnPropertyChanged(); 
+                }
+            }
         }
 
         public double? ComputedSlaveEnd
         {
             get => _computedSlaveEnd;
-            set { _computedSlaveEnd = value; OnPropertyChanged(); }
+            set 
+            {
+                if (_computedSlaveEnd != value)
+                {
+                    _computedSlaveEnd = value; 
+                    OnPropertyChanged(); 
+                }
+            }
         }
 
         public bool IsLimitExceeded
         {
             get => _isLimitExceeded;
-            set { _isLimitExceeded = value; OnPropertyChanged(); }
+            set 
+            {
+                if (_isLimitExceeded != value)
+                {
+                    _isLimitExceeded = value; 
+                    OnPropertyChanged(); 
+                }
+            }
         }
 
         /// <summary>
