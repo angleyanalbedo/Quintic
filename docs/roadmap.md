@@ -30,63 +30,48 @@ This document outlines the architectural evolution of the Quintic Cam Editor, fr
 
 ---
 
-## 🔮 Phase 4: The "Smoothness" Engine (Next Priority)
-**Goal:** Match the interpolation capabilities of mature commercial tools (Siemens/Rexroth). Currently, Quintic relies on explicit analytical segments. Real-world applications often require smooth transitions between arbitrary points.
+## 🔮 Phase 4: Interaction & Integration (Next Priority)
 
-### 4.1 Boundary Value Solver (Automatic Continuity)
+### 3.2 画布控制点拖拽 (Canvas Dragging)
+- **Goal:** 在 S 曲线的分段交界处渲染可交互的“控制点”。
+- **Implementation:** 实现鼠标拖动控制点时，反向更新 DataGrid 里的数值，并实时扭动 V/A/J 曲线。
+
+### 3.3 全局物理极限与超限报警 (Limit Validation)
+- **Goal:** 增加全局配置区：输入伺服电机的物理极限（$V_{max}, A_{max}$）。
+- **Visual Feedback:** 越界视觉反馈：当算出的曲线超限时，导数图表中的违规区域高亮为红色，同时 DataGrid 对应行闪烁警告。
+
+### 4.1 高密度点表导出 (Raw Profile Export) ✅
+- **Goal:** 支持一键导出 .csv 文件，适配基础单片机、自研运动板卡或查表型 PLC 的执行需求。
+- **Status:** 已完成 (CsvExporter).
+
+### 4.2 结构化文本生成 (ST Code Generation)
+- **Goal:** 结合 PLC ST 分析与生成工具经验，将凸轮数据直接翻译成符合 IEC 61131-3 标准的 ARRAY 代码块。
+
+### 4.3 宿主 IDE 集成接口 (API for Host IDE)
+- **Goal:** 将整个 WPF 窗体封装为通用控件（UserControl）或类库。
+- **Integration:** 提供对外接口，确保未来只需一行代码，即可将该凸轮编辑器无缝内嵌至 CASS 工业自动化 IDE 中。
+
+---
+
+## 🔮 Phase 5: Advanced Math (Future)
+**Goal:** Match the interpolation capabilities of mature commercial tools (Siemens/Rexroth).
+
+### 5.1 Boundary Value Solver (Automatic Continuity)
 - **Problem:** Currently, users must manually ensure $V_{end}$ of Segment A matches $V_{start}$ of Segment B.
 - **Solution:** Implement a **Global Solver** (using `scipy.optimize` or `scipy.linalg`).
-    - User defines points $(X, Y)$ and constraints (e.g., $V=0$ at start/end).
-    - System automatically calculates the required boundary velocities/accelerations for all intermediate points to ensure $C^2$ (Acceleration) continuity.
 
-### 4.2 Spline Interpolation
-- **Problem:** Analytical laws (Poly5, ModSine) are rigid. They pass exactly through start/end points but can have "overshoot" between them if points are close.
-- **Solution:** Implement **B-Splines (Cubic/Quintic)**.
-    - Allow users to input a "Cloud of Points" (e.g., from a measured profile).
-    - Fit a smooth curve through these points with adjustable "Tension" parameters (similar to CAD tools).
-
-### 4.3 Transition Handling (Rounding)
-- **Feature:** "Blend" or "Round" corners between linear segments automatically (e.g., adding a circular or polynomial fillet between two straight lines).
-
-### 4.4 Interactive Design (The "Editor" Experience)
-- **Control Points:** Render draggable handles (white/blue hollow circles) at segment junctions $(M_{end}, S_{end})$.
-- **Real-time Feedback:** Dragging a handle instantly updates the $S$ curve and recalculates $V, A, J$ derivatives.
-- **Boundary Constraints UI:** Expand the segment table to allow explicit input of $V_{start}, V_{end}, A_{start}, A_{end}$ (currently hidden/assumed zero).
+### 5.2 Spline Interpolation
+- **Solution:** Implement **B-Splines (Cubic/Quintic)** for smooth curve fitting through point clouds.
 
 ---
 
-## 🔮 Phase 5: Application Intelligence
-**Goal:** Decouple "Motion Design" from "Machine Process". Engineers shouldn't calculate cam angles; they should input product dimensions.
+## 🔮 Phase 6: Application Intelligence
+**Goal:** Decouple "Motion Design" from "Machine Process".
 
-### 5.1 Application Wizards (The "Money" Features)
-- **Flying Shear (飞锯):** Input: Product Length, Line Speed, Cut Time. -> Output: Synchronous Cam Profile.
-- **Rotary Knife (旋切):** Input: Knife Radius, Product Length. -> Output: Sync + Retract Profile.
-- **Cross Sealer (横封):** Input: Pack Depth, Dwell Time. -> Output: Sealing Profile.
+### 6.1 Application Wizards
+- **Flying Shear (飞锯)**
+- **Rotary Knife (旋切)**
+- **Cross Sealer (横封)**
 
-### 5.2 Kinematics & Dynamics Check
-- **Physical Limits Alarm:**
-    - User sets global limits (e.g., $V_{max} = 1000$ mm/s, $A_{max} = 5g$).
-    - **Visual Feedback:** Draw red horizontal limit lines on $V/A$ plots. Highlight areas exceeding limits in red.
-    - **Table Feedback:** Flag specific segments in the data grid that violate these limits.
-- **Motor Sizing:** Integrate Motor & Load Models.
-    - Input: Inertia ($J_{load}$), Friction, Motor Torque Curve ($T_{motor}$).
-    - Output: **"Torque Utilization"** chart. Warn user if the cam profile exceeds the motor's physical capability.
-
----
-
-## 🔮 Phase 6: Ecosystem Integration
-**Goal:** Direct integration with PLC environments (Siemens, Rockwell, Beckhoff).
-
-### 6.1 IEC 61131-3 Code Generation
-- Instead of "Dumb CSV", generate "Smart Code".
-- **Structured Text (ST):** Generate a function block that calculates the profile on the fly (for memory-constrained PLCs).
-- **Data Blocks (DB):** Generate Siemens S7 source files (`.awl` / `.scl`) or TIA Portal Openness XML.
-- **L5X:** Generate Rockwell Add-On Instructions (AOI).
-
-### 6.2 Online Monitoring (Digital Twin)
-- Connect to the PLC via OPC UA / Modbus.
-- Overlay the **"Actual Position"** (Encoder Feedback) on top of the **"Command Position"** (Quintic Profile) to diagnose tracking errors in real-time.
-
-### 6.3 Mechanical Export
-- **DXF/DWG Generation:** Export the 2D cam profile geometry for mechanical CAD (SolidWorks/AutoCAD).
-- **Report Generation:** Generate PDF datasheets with position tables and min/max values for documentation.
+### 6.2 Motor Sizing
+- Integrate Motor & Load Models (Inertia, Friction, Torque Curves).
