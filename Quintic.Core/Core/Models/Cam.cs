@@ -5,8 +5,10 @@ namespace Quintic.Wpf.Core.Models
     public enum MotionLawType
     {
         Polynomial5,
+        Polynomial7,
         ModifiedSine,
         Cycloidal,
+        SimpleSine,
         ConstantVelocity,
         ModifiedTrapezoid,
         Trapezoidal,

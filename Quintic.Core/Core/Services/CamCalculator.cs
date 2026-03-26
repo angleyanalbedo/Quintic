@@ -100,6 +100,7 @@ namespace Quintic.Wpf.Core.Services
                         nextA = seg.EndAcceleration;
                         break;
 
+                    case MotionLawType.Polynomial7:
                     case MotionLawType.Cycloidal:
                     case MotionLawType.ModifiedTrapezoid:
                     case MotionLawType.ModifiedSine:
@@ -108,6 +109,20 @@ namespace Quintic.Wpf.Core.Services
                         // Standard laws typically end at rest (V=0, A=0)
                         nextV = 0;
                         nextA = 0;
+                        break;
+
+                    case MotionLawType.SimpleSine:
+                        nextV = 0;
+                        // Simple Sine ends with non-zero acceleration: a_end = -h * pi^2 / (2 * beta^2)
+                        if (Math.Abs(duration) > 1e-9)
+                        {
+                            double beta = duration;
+                            nextA = -height * Math.Pow(Math.PI, 2) / (2 * beta * beta);
+                        }
+                        else
+                        {
+                            nextA = 0;
+                        }
                         break;
                 }
 
@@ -173,9 +188,15 @@ namespace Quintic.Wpf.Core.Services
                     case MotionLawType.Cycloidal:
                         kernel = new Cycloidal(mStart, mEnd, sStart, sEnd);
                         break;
+                    case MotionLawType.SimpleSine:
+                        kernel = new SimpleSine(mStart, mEnd, sStart, sEnd);
+                        break;
                     case MotionLawType.ModifiedSine:
                     case MotionLawType.ModifiedTrapezoid:
                         kernel = new ModifiedTrapezoid(mStart, mEnd, sStart, sEnd);
+                        break;
+                    case MotionLawType.Polynomial7:
+                        kernel = new Polynomial7(mStart, mEnd, sStart, sEnd);
                         break;
                     case MotionLawType.ConstantVelocity:
                         kernel = new ConstantVelocity(mStart, mEnd, sStart, sEnd);
