@@ -11,6 +11,7 @@ namespace Quintic.Wpf.Core.Models
         SimpleSine,
         SevenSegment,
         Gutman,
+        BSpline,
         ConstantVelocity,
         ModifiedTrapezoid,
         Trapezoidal,

@@ -126,6 +126,31 @@ namespace Quintic.Wpf.Core.Services
                             nextA = 0;
                         }
                         break;
+
+                    case MotionLawType.BSpline:
+                        // BSpline (Cubic) ends with specific V/A
+                        // V is user defined (EndVelocity)
+                        nextV = seg.EndVelocity;
+                        // A is calculated from Cubic formula at t=1
+                        // a_tau(1) = 6*s0 + 2*m0 - 6*s1 + 4*m1
+                        // where s0=0, s1=height, m0=vStart*beta, m1=vEnd*beta
+                        {
+                            double beta = duration;
+                            if (Math.Abs(beta) > 1e-9)
+                            {
+                                double m0 = seg.StartVelocity * beta;
+                                double m1 = seg.EndVelocity * beta;
+                                double s0 = 0; 
+                                double s1 = height;
+                                double a_tau_end = 6 * s0 + 2 * m0 - 6 * s1 + 4 * m1;
+                                nextA = a_tau_end / (beta * beta);
+                            }
+                            else
+                            {
+                                nextA = 0;
+                            }
+                        }
+                        break;
                 }
 
                 // Store calculated end conditions back into the resolved segment
@@ -198,6 +223,9 @@ namespace Quintic.Wpf.Core.Services
                         break;
                     case MotionLawType.Gutman:
                         kernel = new Gutman(mStart, mEnd, sStart, sEnd);
+                        break;
+                    case MotionLawType.BSpline:
+                        kernel = new BSpline(mStart, mEnd, sStart, sEnd, segment.StartVelocity, segment.EndVelocity);
                         break;
                     case MotionLawType.ModifiedSine:
                     case MotionLawType.ModifiedTrapezoid:
