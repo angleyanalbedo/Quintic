@@ -15,6 +15,29 @@
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
 
+        <Style x:Key="DarkComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+            <Setter Property="Background" Value="{StaticResource Brush.Control.Background}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Brush.Control.Border}"/>
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="Background" Value="{StaticResource Brush.Control.Background}"/>
+                        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#33FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#44FFFFFF"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="HeaderButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
@@ -116,6 +139,17 @@
                         <DataGridComboBoxColumn.Header>
                             <TextBlock Text="Law" ToolTip="Motion Law / Curve Type"/>
                         </DataGridComboBoxColumn.Header>
+                        <DataGridComboBoxColumn.ElementStyle>
+                            <Style TargetType="ComboBox" BasedOn="{StaticResource DarkComboBoxStyle}">
+                                <Setter Property="IsHitTestVisible" Value="False"/>
+                                <Setter Property="Focusable" Value="False"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Background" Value="Transparent"/>
+                            </Style>
+                        </DataGridComboBoxColumn.ElementStyle>
+                        <DataGridComboBoxColumn.EditingElementStyle>
+                            <Style TargetType="ComboBox" BasedOn="{StaticResource DarkComboBoxStyle}"/>
+                        </DataGridComboBoxColumn.EditingElementStyle>
                     </DataGridComboBoxColumn>
 
                     <!-- Edit Control Points Button -->
