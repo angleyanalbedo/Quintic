@@ -104,6 +104,8 @@ namespace Quintic.Wpf.Core.Services
                     case MotionLawType.Cycloidal:
                     case MotionLawType.ModifiedTrapezoid:
                     case MotionLawType.ModifiedSine:
+                    case MotionLawType.SevenSegment:
+                    case MotionLawType.Gutman:
                     case MotionLawType.Dwell:
                     default:
                         // Standard laws typically end at rest (V=0, A=0)
@@ -190,6 +192,12 @@ namespace Quintic.Wpf.Core.Services
                         break;
                     case MotionLawType.SimpleSine:
                         kernel = new SimpleSine(mStart, mEnd, sStart, sEnd);
+                        break;
+                    case MotionLawType.SevenSegment:
+                        kernel = new SevenSegment(mStart, mEnd, sStart, sEnd);
+                        break;
+                    case MotionLawType.Gutman:
+                        kernel = new Gutman(mStart, mEnd, sStart, sEnd);
                         break;
                     case MotionLawType.ModifiedSine:
                     case MotionLawType.ModifiedTrapezoid:

@@ -9,6 +9,8 @@ namespace Quintic.Wpf.Core.Models
         ModifiedSine,
         Cycloidal,
         SimpleSine,
+        SevenSegment,
+        Gutman,
         ConstantVelocity,
         ModifiedTrapezoid,
         Trapezoidal,
