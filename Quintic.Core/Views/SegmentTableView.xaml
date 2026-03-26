@@ -88,10 +88,22 @@
                       GridLinesVisibility="Horizontal"
                       HeadersVisibility="Column"
                       BorderThickness="0"
-                      RowHeight="28">
+                      RowHeight="28"
+                      Background="Transparent">
+                <DataGrid.Resources>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#33FFFFFF"/>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#22FFFFFF"/>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#FFFFFFFF"/>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#FFFFFFFF"/>
+                </DataGrid.Resources>
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
                         <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#11FFFFFF"/>
+                            </Trigger>
                             <DataTrigger Binding="{Binding IsLimitExceeded}" Value="True">
                                 <Setter Property="Background" Value="#40FF0000"/>
                                 <Setter Property="ToolTip" Value="Physical Limit Exceeded (Velocity or Acceleration)"/>
