@@ -24,7 +24,7 @@ This document outlines the architectural evolution of the Quintic Cam Editor, fr
 - **Scope:** 
     - **Dual Reference Domains:** Time (s) vs. Master (deg).
     - **Coordinate Modes:** Relative (Delta) vs. Absolute.
-    - **Law Library:** Polynomial 5, Cycloidal, Modified Sine/Trapezoid.
+    - **Law Library:** Polynomial 5/7, Cycloidal, Modified Sine/Trapezoid, Simple Sine, 7-Segment, Gutman.
     - **Analytics:** Real-time Characteristic Values ($V_{max}, A_{max}, J_{max}$).
 - **Outcome:** A flexible kernel capable of handling complex machine logic (e.g., "Dwell for 100ms then Move 50mm").
 
