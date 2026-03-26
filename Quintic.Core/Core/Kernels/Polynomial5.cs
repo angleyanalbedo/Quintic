@@ -68,7 +68,7 @@ namespace Quintic.Wpf.Core.Kernels
             C5 = 6 * (s1 - s0) - 3 * v0 - 0.5 * a0 - 3 * v1 + 0.5 * a1;
         }
 
-        public CamPoint Calculate(double theta)
+        public override CamPoint Calculate(double theta)
         {
             double beta = _masterEnd - _masterStart;
             if (Math.Abs(beta) < 1e-9) return new CamPoint(theta, _slaveStart, 0, 0, 0);
