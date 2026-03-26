@@ -53,8 +53,9 @@ This document outlines the architectural evolution of the Quintic Cam Editor, fr
 - **Goal:** One-click export to .csv for microcontrollers or table-based PLCs.
 - **Status:** Completed (`CsvExporter`).
 
-### 4.5 Structured Text Generation (ST Code)
+### 4.5 Structured Text Generation (ST Code) ✅
 - **Goal:** Generate IEC 61131-3 compliant ARRAY code blocks directly from cam data.
+- **Status:** Completed (`StCodeGenerator`).
 
 ### 4.6 Host IDE Integration API
 - **Goal:** Encapsulate the WPF window as a generic UserControl or Class Library.
@@ -98,3 +99,19 @@ This document outlines the architectural evolution of the Quintic Cam Editor, fr
 
 ### 6.2 Motor Sizing
 - Integrate Motor & Load Models (Inertia, Friction, Torque Curves).
+
+---
+
+## 🔮 Phase 7: Real-time Signal Processing (New)
+**Goal:** Handle real-world sensor noise and mechanical imperfections (Soft-PLC features).
+
+### 7.1 Input Signal Conditioning
+- **Feature:** First-Order Low-Pass Filter for Master Encoder.
+- **Config:** User-configurable `FilterConstant` (alpha) and `LagCompensation`.
+
+### 7.2 Dynamic Error Correction
+- **Feature:** Dead-band management for phase synchronization.
+- **Logic:** Ignore errors < `Threshold` (e.g., 0.05mm) to prevent motor oscillation.
+
+### 7.3 Soft-Motion S-Curve Injection
+- **Feature:** Superimpose correction moves using S-Curve profiles instead of step changes to prevent "Overcurrent".
