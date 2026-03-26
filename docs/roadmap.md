@@ -37,21 +37,26 @@ This document outlines the architectural evolution of the Quintic Cam Editor, fr
 - **Status:** Completed.
 - **Implementation:** Implemented mouse drag events in `PlotService` to update `Segment` data in real-time and recalculate V/A/J curves.
 
-### 4.2 Global Physical Limits & Alarm (Limit Validation) ✅
+### 4.2 Canvas Point Addition (Split Segment) ✅
+- **Goal:** Allow users to add new points directly on the curve to split segments.
+- **Status:** Completed.
+- **Implementation:** Implemented `Ctrl + LeftClick` on the canvas to calculate the exact split point and insert a new segment while maintaining continuity.
+
+### 4.3 Global Physical Limits & Alarm (Limit Validation) ✅
 - **Goal:** Global configuration for servo motor physical limits ($V_{max}, A_{max}$).
 - **Status:** Completed.
 - **Features:**
     - **Charts:** Highlight violating regions in red on V/A plots (`RectangleAnnotation`).
     - **Grid:** Highlight corresponding rows in the DataGrid with red background.
 
-### 4.3 Raw Profile Export (High Density CSV) ✅
+### 4.4 Raw Profile Export (High Density CSV) ✅
 - **Goal:** One-click export to .csv for microcontrollers or table-based PLCs.
 - **Status:** Completed (`CsvExporter`).
 
-### 4.4 Structured Text Generation (ST Code)
+### 4.5 Structured Text Generation (ST Code)
 - **Goal:** Generate IEC 61131-3 compliant ARRAY code blocks directly from cam data.
 
-### 4.5 Host IDE Integration API
+### 4.6 Host IDE Integration API
 - **Goal:** Encapsulate the WPF window as a generic UserControl or Class Library.
 - **Integration:** Provide an external API to embed the cam editor into the CASS Industrial Automation IDE with a single line of code.
 
