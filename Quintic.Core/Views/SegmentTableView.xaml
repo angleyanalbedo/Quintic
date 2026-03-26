@@ -15,14 +15,31 @@
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
 
+        <Style x:Key="DarkEditingTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="#22FFFFFF"/>
+            <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="2"/>
+            <Setter Property="CaretBrush" Value="{StaticResource Brush.Text.Primary}"/>
+            <Setter Property="SelectionBrush" Value="{StaticResource Brush.Accent}"/>
+        </Style>
+
         <Style x:Key="DarkComboBoxStyle" TargetType="ComboBox">
             <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
             <Setter Property="Background" Value="{StaticResource Brush.Control.Background}"/>
             <Setter Property="BorderBrush" Value="{StaticResource Brush.Control.Border}"/>
+            <Setter Property="Resources">
+                <Setter.Value>
+                    <ResourceDictionary>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#252526"/>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#F0F0F0"/>
+                    </ResourceDictionary>
+                </Setter.Value>
+            </Setter>
             <Setter Property="ItemContainerStyle">
                 <Setter.Value>
                     <Style TargetType="ComboBoxItem">
-                        <Setter Property="Background" Value="{StaticResource Brush.Control.Background}"/>
+                        <Setter Property="Background" Value="Transparent"/>
                         <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
                         <Setter Property="BorderThickness" Value="0"/>
                         <Style.Triggers>
@@ -95,13 +112,6 @@
                     <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#22FFFFFF"/>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#FFFFFFFF"/>
                     <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#FFFFFFFF"/>
-                    <Style TargetType="TextBox">
-                        <Setter Property="Background" Value="#22FFFFFF"/>
-                        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
-                        <Setter Property="BorderThickness" Value="0"/>
-                        <Setter Property="Padding" Value="2"/>
-                        <Setter Property="CaretBrush" Value="{StaticResource Brush.Text.Primary}"/>
-                    </Style>
                 </DataGrid.Resources>
                 <DataGrid.CellStyle>
                     <Style TargetType="DataGridCell">
@@ -146,7 +156,7 @@
                     </DataGridTextColumn>
 
                     <!-- Master End (Editable) -->
-                    <DataGridTextColumn Binding="{Binding MasterVal, StringFormat=F1}" Width="0.7*">
+                    <DataGridTextColumn Binding="{Binding MasterVal, StringFormat=F1}" Width="0.7*" EditingElementStyle="{StaticResource DarkEditingTextBoxStyle}">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="M.End" ToolTip="Master End Angle (deg) or Duration"/>
                         </DataGridTextColumn.Header>
@@ -160,7 +170,7 @@
                     </DataGridTextColumn>
 
                     <!-- Slave End (Editable) -->
-                    <DataGridTextColumn Binding="{Binding SlaveVal, StringFormat=F1}" Width="0.7*">
+                    <DataGridTextColumn Binding="{Binding SlaveVal, StringFormat=F1}" Width="0.7*" EditingElementStyle="{StaticResource DarkEditingTextBoxStyle}">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="S.End" ToolTip="Slave End Position (mm) or Stroke"/>
                         </DataGridTextColumn.Header>
