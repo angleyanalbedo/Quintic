@@ -32,17 +32,17 @@ This document outlines the architectural evolution of the Quintic Cam Editor, fr
 
 ## 🔮 Phase 4: Interaction & Integration (Next Priority)
 
-### 4.1 Canvas Dragging (Interactive Control Points)
+### 4.1 Canvas Dragging (Interactive Control Points) ✅
 - **Goal:** Render interactive "Control Points" at segment junctions on the S-curve.
-- **Status:** Not Implemented. (Static `ScatterSeries` exists in `PlotService.cs`, but no mouse event handling or reverse data binding).
-- **Implementation:** Implement mouse drag events to update `Segment` data in real-time and recalculate V/A/J curves.
+- **Status:** Completed.
+- **Implementation:** Implemented mouse drag events in `PlotService` to update `Segment` data in real-time and recalculate V/A/J curves.
 
-### 4.2 Global Physical Limits & Alarm (Limit Validation)
+### 4.2 Global Physical Limits & Alarm (Limit Validation) ✅
 - **Goal:** Global configuration for servo motor physical limits ($V_{max}, A_{max}$).
-- **Status:** Partially Implemented. (Reference lines exist in `PlotService.cs`, `MainViewModel.cs` has properties).
-- **Missing:** Advanced visual feedback.
-    - **Charts:** Highlight violating regions in red on V/A plots.
-    - **Grid:** Flash or highlight corresponding rows in the DataGrid.
+- **Status:** Completed.
+- **Features:**
+    - **Charts:** Highlight violating regions in red on V/A plots (`RectangleAnnotation`).
+    - **Grid:** Highlight corresponding rows in the DataGrid with red background.
 
 ### 4.3 Raw Profile Export (High Density CSV) ✅
 - **Goal:** One-click export to .csv for microcontrollers or table-based PLCs.
