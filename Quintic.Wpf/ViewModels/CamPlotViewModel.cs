@@ -16,6 +16,8 @@ namespace Quintic.Wpf.ViewModels
         public PlotModel VAPlotModel => _plotService.VAPlotModel;
 
         public event System.Action<int, double, double> PointDragged;
+        public event System.Action DragStarted;
+        public event System.Action DragFinished;
 
         public ICommand ResetViewCommand { get; private set; }
 
@@ -68,6 +70,8 @@ namespace Quintic.Wpf.ViewModels
         {
             _plotService = new PlotService();
             _plotService.PointDragged += (i, m, s) => PointDragged?.Invoke(i, m, s);
+            _plotService.DragStarted += () => DragStarted?.Invoke();
+            _plotService.DragFinished += () => DragFinished?.Invoke();
             ResetViewCommand = new RelayCommand(o => _plotService.ResetAxes());
         }
 

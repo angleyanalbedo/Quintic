@@ -51,6 +51,7 @@ namespace Quintic.Wpf.ViewModels
         private int _historyIndex = -1;
         private bool _isNavigatingHistory = false;
         private bool _isRecalculating = false;
+        private bool _isDragging = false;
 
         public ICommand SaveProjectCommand { get; private set; }
         public ICommand OpenProjectCommand { get; private set; }
@@ -72,6 +73,12 @@ namespace Quintic.Wpf.ViewModels
             
             // Handle Dragging
             CamPlotVM.PointDragged += OnCamPointDragged;
+            CamPlotVM.DragStarted += () => _isDragging = true;
+            CamPlotVM.DragFinished += () => 
+            { 
+                _isDragging = false; 
+                RecordSnapshot(); // Record final state after drag
+            };
 
             SaveProjectCommand = new RelayCommand(ExecuteSaveProject);
             OpenProjectCommand = new RelayCommand(ExecuteOpenProject);
@@ -145,6 +152,7 @@ namespace Quintic.Wpf.ViewModels
                 _historyIndex--;
                 ApplyState(_history[_historyIndex]);
                 _isNavigatingHistory = false;
+                CommandManager.InvalidateRequerySuggested();
             }
         }
 
@@ -156,6 +164,7 @@ namespace Quintic.Wpf.ViewModels
                 _historyIndex++;
                 ApplyState(_history[_historyIndex]);
                 _isNavigatingHistory = false;
+                CommandManager.InvalidateRequerySuggested();
             }
         }
 
@@ -179,7 +188,7 @@ namespace Quintic.Wpf.ViewModels
 
         private void RecordSnapshot()
         {
-            if (_isNavigatingHistory) return;
+            if (_isNavigatingHistory || _isDragging) return;
 
             var state = new ProjectStateDto
             {
@@ -206,6 +215,7 @@ namespace Quintic.Wpf.ViewModels
 
             _history.Add(json);
             _historyIndex++;
+            CommandManager.InvalidateRequerySuggested();
         }
 
         private void ExecuteExportCsv(object obj)

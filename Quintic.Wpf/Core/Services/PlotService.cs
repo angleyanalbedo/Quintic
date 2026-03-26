@@ -14,6 +14,8 @@ namespace Quintic.Wpf.Core.Services
         public PlotModel VAPlotModel { get; private set; }
 
         public event System.Action<int, double, double> PointDragged;
+        public event System.Action DragStarted;
+        public event System.Action DragFinished;
 
         private bool _isSyncingAxes = false;
         private int _dragIndex = -1;
@@ -39,6 +41,7 @@ namespace Quintic.Wpf.Core.Services
             if (nearest != null && nearest.Position.DistanceTo(e.Position) < 15)
             {
                 _dragIndex = (int)nearest.Index;
+                DragStarted?.Invoke();
                 e.Handled = true;
                 SPlotModel.InvalidatePlot(false);
             }
@@ -60,7 +63,11 @@ namespace Quintic.Wpf.Core.Services
 
         private void OnSPlotMouseUp(object sender, OxyMouseEventArgs e)
         {
-            _dragIndex = -1;
+            if (_dragIndex != -1)
+            {
+                _dragIndex = -1;
+                DragFinished?.Invoke();
+            }
         }
 
         public void ResetAxes()
