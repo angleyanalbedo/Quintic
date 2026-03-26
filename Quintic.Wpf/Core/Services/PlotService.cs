@@ -28,7 +28,7 @@ namespace Quintic.Wpf.Core.Services
             SPlotModel.MouseUp += OnSPlotMouseUp;
         }
 
-        private void OnSPlotMouseDown(object sender, OxyMouseEventArgs e)
+        private void OnSPlotMouseDown(object sender, OxyMouseDownEventArgs e)
         {
             if (e.ChangedButton != OxyMouseButton.Left) return;
 
@@ -36,7 +36,7 @@ namespace Quintic.Wpf.Core.Services
             if (series == null) return;
 
             var nearest = series.GetNearestPoint(e.Position, false);
-            if (nearest != null && nearest.Distance < 15)
+            if (nearest != null && nearest.Position.DistanceTo(e.Position) < 15)
             {
                 _dragIndex = (int)nearest.Index;
                 e.Handled = true;
