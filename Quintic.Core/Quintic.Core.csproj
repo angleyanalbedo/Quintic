@@ -17,6 +17,10 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IncludeSymbols>True</IncludeSymbols>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <RepositoryUrl>https://github.com/angleyanalbedo/Quintic</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/angleyanalbedo/Quintic</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
