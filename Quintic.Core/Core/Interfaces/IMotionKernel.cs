@@ -1,7 +1,7 @@
 using Quintic.Wpf.Core.Models;
 using System.Collections.Generic;
 
-namespace Quintic.Core.Core.Interfaces
+namespace Quintic.Wpf.Core.Interfaces
 {
     public interface IMotionKernel
     {

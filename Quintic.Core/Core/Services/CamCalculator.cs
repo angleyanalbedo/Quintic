@@ -1,4 +1,4 @@
-using Quintic.Core.Core.Interfaces;
+using Quintic.Wpf.Core.Interfaces;
 using Quintic.Wpf.Core.Kernels;
 using Quintic.Wpf.Core.Models;
 using System;

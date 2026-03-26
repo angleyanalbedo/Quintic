@@ -65,9 +65,9 @@ This document outlines the architectural evolution of the Quintic Cam Editor, fr
 ## 🔮 Phase 5: Advanced Math (Future)
 **Goal:** Match the interpolation capabilities of mature commercial tools (Siemens/Rexroth).
 
-### 5.1 Boundary Value Solver (Automatic Continuity)
+### 5.1 Boundary Value Solver (Automatic Continuity) ✅
 - **Problem:** Currently, users must manually ensure $V_{end}$ of Segment A matches $V_{start}$ of Segment B.
-- **Solution:** Implement a **Global Solver** (using `scipy.optimize` or `scipy.linalg`).
+- **Solution:** Implemented forward propagation of $V$ and $A$ boundary conditions in `CamCalculator`.
 
 ### 5.2 Spline Interpolation
 - **Solution:** Implement **B-Splines (Cubic/Quintic)** for smooth curve fitting through point clouds.

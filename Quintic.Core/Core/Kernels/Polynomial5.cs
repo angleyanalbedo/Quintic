@@ -1,4 +1,4 @@
-using Quintic.Core.Kernels.Base;
+using Quintic.Wpf.Core.Kernels.Base;
 using Quintic.Wpf.Core.Models;
 using System;
 using System.Collections.Generic;
