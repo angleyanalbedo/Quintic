@@ -73,6 +73,7 @@ namespace Quintic.Wpf.ViewModels
             
             // Handle Dragging
             CamPlotVM.PointDragged += OnCamPointDragged;
+            CamPlotVM.CanvasCtrlClicked += OnCanvasCtrlClicked;
             CamPlotVM.DragStarted += () => _isDragging = true;
             CamPlotVM.DragFinished += () => 
             { 
@@ -265,6 +266,69 @@ namespace Quintic.Wpf.ViewModels
                 seg.SlaveVal = newS - prevS;
             }
             // PropertyChanged will trigger Recalculate via SegmentTableVM listener
+        }
+
+        private void OnCanvasCtrlClicked(double x, double y)
+        {
+            // Find the segment containing x
+            var targetSegment = SegmentTableVM.Segments.FirstOrDefault(s => 
+                s.ComputedMasterStart <= x && s.ComputedMasterEnd > x);
+            
+            if (targetSegment == null) return;
+
+            RecordSnapshot();
+
+            // Calculate exact S at x to maintain continuity (Snap to curve)
+            double splitS = y; 
+            if (_lastCalculation != null)
+            {
+                // Find closest point in calculation result
+                var p = _lastCalculation.Points.OrderBy(pt => Math.Abs(pt.Theta - x)).FirstOrDefault();
+                if (p != null) splitS = p.S;
+            }
+
+            int index = SegmentTableVM.Segments.IndexOf(targetSegment);
+            
+            // Create new segment (Right part)
+            var newSegment = new Segment 
+            { 
+                MotionLaw = targetSegment.MotionLaw,
+                CoordinateMode = targetSegment.CoordinateMode,
+                ReferenceType = targetSegment.ReferenceType
+            };
+
+            // Save original values
+            double origMasterEnd = targetSegment.ComputedMasterEnd ?? 0;
+            double origSlaveEnd = targetSegment.ComputedSlaveEnd ?? 0;
+            double origMasterStart = targetSegment.ComputedMasterStart ?? 0;
+            double origSlaveStart = targetSegment.ComputedSlaveStart ?? 0;
+
+            // Update Left Segment (targetSegment)
+            if (targetSegment.CoordinateMode == CoordinateMode.Absolute)
+            {
+                targetSegment.MasterVal = x;
+                targetSegment.SlaveVal = splitS;
+                
+                newSegment.MasterVal = origMasterEnd;
+                newSegment.SlaveVal = origSlaveEnd;
+            }
+            else // Relative
+            {
+                double splitMasterDelta = x - origMasterStart;
+                double splitSlaveDelta = splitS - origSlaveStart;
+
+                // Ensure we don't have negative or zero duration
+                if (splitMasterDelta <= 0.001) splitMasterDelta = 0.001;
+
+                targetSegment.MasterVal = splitMasterDelta;
+                targetSegment.SlaveVal = splitSlaveDelta;
+
+                newSegment.MasterVal = origMasterEnd - x; 
+                newSegment.SlaveVal = origSlaveEnd - splitS;
+            }
+
+            // Insert new segment
+            SegmentTableVM.Segments.Insert(index + 1, newSegment);
         }
 
         private void Recalculate()

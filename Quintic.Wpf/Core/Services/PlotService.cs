@@ -14,6 +14,7 @@ namespace Quintic.Wpf.Core.Services
         public PlotModel VAPlotModel { get; private set; }
 
         public event System.Action<int, double, double> PointDragged;
+        public event System.Action<double, double> CanvasCtrlClicked;
         public event System.Action DragStarted;
         public event System.Action DragFinished;
 
@@ -34,13 +35,40 @@ namespace Quintic.Wpf.Core.Services
         {
             if (e.ChangedButton != OxyMouseButton.Left) return;
 
-            var series = SPlotModel.Series.OfType<ScatterSeries>().FirstOrDefault();
-            if (series == null) return;
-
-            var nearest = series.GetNearestPoint(e.Position, false);
-            if (nearest != null && nearest.Position.DistanceTo(e.Position) < 15)
+            // Handle Ctrl + Click to Add Point (Split Segment)
+            if (e.ModifierKeys.HasFlag(OxyModifierKeys.Control))
             {
-                _dragIndex = (int)nearest.Index;
+                var xAxis = SPlotModel.Axes.FirstOrDefault(a => a.Position == AxisPosition.Bottom);
+                var yAxis = SPlotModel.Axes.FirstOrDefault(a => a.Position == AxisPosition.Left);
+
+                if (xAxis != null && yAxis != null)
+                {
+                    // Check if we are clicking too close to an existing point (optional, but good for UX)
+                    var series = SPlotModel.Series.OfType<ScatterSeries>().FirstOrDefault();
+                    if (series != null)
+                    {
+                        var nearest = series.GetNearestPoint(e.Position, false);
+                        if (nearest != null && nearest.Position.DistanceTo(e.Position) < 15)
+                        {
+                            return; // Ignore if clicking on an existing control point
+                        }
+                    }
+
+                    var x = xAxis.InverseTransform(e.Position.X);
+                    var y = yAxis.InverseTransform(e.Position.Y);
+                    CanvasCtrlClicked?.Invoke(x, y);
+                    e.Handled = true;
+                    return;
+                }
+            }
+
+            var seriesDrag = SPlotModel.Series.OfType<ScatterSeries>().FirstOrDefault();
+            if (seriesDrag == null) return;
+
+            var nearestDrag = seriesDrag.GetNearestPoint(e.Position, false);
+            if (nearestDrag != null && nearestDrag.Position.DistanceTo(e.Position) < 15)
+            {
+                _dragIndex = (int)nearestDrag.Index;
                 DragStarted?.Invoke();
                 e.Handled = true;
                 SPlotModel.InvalidatePlot(false);
