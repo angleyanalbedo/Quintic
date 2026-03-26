@@ -22,6 +22,7 @@ namespace Quintic.Wpf.ViewModels
 
         public ICommand AddSegmentCommand { get; private set; }
         public ICommand RemoveSegmentCommand { get; private set; }
+        public ICommand EditControlPointsCommand { get; private set; }
 
         // Event to notify parent when recalculation is needed
         public event EventHandler SegmentsChanged;
@@ -30,6 +31,7 @@ namespace Quintic.Wpf.ViewModels
         {
             AddSegmentCommand = new RelayCommand(ExecuteAddSegment);
             RemoveSegmentCommand = new RelayCommand(ExecuteRemoveSegment, CanExecuteRemoveSegment);
+            EditControlPointsCommand = new RelayCommand(ExecuteEditControlPoints);
 
             Segments = new ObservableCollection<Segment>
             {
@@ -98,6 +100,15 @@ namespace Quintic.Wpf.ViewModels
         private bool CanExecuteRemoveSegment(object obj)
         {
             return SelectedSegment != null && Segments.Count > 1;
+        }
+
+        private void ExecuteEditControlPoints(object obj)
+        {
+            if (obj is Segment segment)
+            {
+                // Placeholder for dialog logic
+                System.Windows.MessageBox.Show($"Edit Control Points for Segment {segment.Id}\n(Feature to be implemented with a dialog window)", "Edit Control Points");
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

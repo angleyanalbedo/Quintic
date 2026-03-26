@@ -1,6 +1,7 @@
 using Quintic.Wpf.Core.Kernels.Base;
 using Quintic.Wpf.Core.Models;
 using System;
+using System.Collections.Generic;
 
 namespace Quintic.Wpf.Core.Kernels
 {
@@ -15,15 +16,17 @@ namespace Quintic.Wpf.Core.Kernels
         private readonly double _slaveEnd;
         private readonly double _vStart;
         private readonly double _vEnd;
+        private readonly List<CamPoint> _controlPoints;
 
         public BSpline(double masterStart, double masterEnd, double slaveStart, double slaveEnd, 
-                       double vStart = 0, double vEnd = 0)
+                       double vStart = 0, double vEnd = 0, List<CamPoint> controlPoints = null)
             : base(masterStart, masterEnd)
         {
             _slaveStart = slaveStart;
             _slaveEnd = slaveEnd;
             _vStart = vStart;
             _vEnd = vEnd;
+            _controlPoints = controlPoints ?? new List<CamPoint>();
         }
 
         public override CamPoint Calculate(double theta)

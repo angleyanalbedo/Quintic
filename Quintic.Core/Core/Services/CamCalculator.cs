@@ -225,7 +225,7 @@ namespace Quintic.Wpf.Core.Services
                         kernel = new Gutman(mStart, mEnd, sStart, sEnd);
                         break;
                     case MotionLawType.BSpline:
-                        kernel = new BSpline(mStart, mEnd, sStart, sEnd, segment.StartVelocity, segment.EndVelocity);
+                        kernel = new BSpline(mStart, mEnd, sStart, sEnd, segment.StartVelocity, segment.EndVelocity, segment.ControlPoints);
                         break;
                     case MotionLawType.ModifiedSine:
                     case MotionLawType.ModifiedTrapezoid:
