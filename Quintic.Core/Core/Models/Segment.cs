@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -27,6 +28,10 @@ namespace Quintic.Wpf.Core.Models
 
         // Validation State
         private bool _isLimitExceeded;
+
+        // B-Spline Control Points (Relative to Segment Start)
+        // Format: List of {MasterOffset, SlaveOffset}
+        private List<CamPoint> _controlPoints = new List<CamPoint>();
 
         public Segment()
         {
@@ -163,6 +168,12 @@ namespace Quintic.Wpf.Core.Models
                     OnPropertyChanged(); 
                 }
             }
+        }
+
+        public List<CamPoint> ControlPoints
+        {
+            get => _controlPoints;
+            set { _controlPoints = value; OnPropertyChanged(); }
         }
 
         /// <summary>
