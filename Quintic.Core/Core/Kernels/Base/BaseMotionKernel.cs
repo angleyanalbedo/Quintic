@@ -1,8 +1,8 @@
-using Quintic.Wpf.Core.Interfaces;
+using Quintic.Core.Core.Interfaces;
 using Quintic.Wpf.Core.Models;
 using System.Collections.Generic;
 
-namespace Quintic.Wpf.Core.Kernels.Base
+namespace Quintic.Core.Kernels.Base
 {
     public abstract class BaseMotionKernel : IMotionKernel
     {
