@@ -60,6 +60,13 @@ This document outlines the architectural evolution of the Quintic Cam Editor, fr
 - **Goal:** Encapsulate the WPF window as a generic UserControl or Class Library.
 - **Integration:** Provide an external API to embed the cam editor into the CASS Industrial Automation IDE with a single line of code.
 
+### 4.7 Discrete Logic Tracks (Cam Switch / PLS)
+- **Goal:** Microsecond-level synchronization of Motion and IO.
+- **UI:** Multi-channel tracks below the main chart for defining IO On/Off intervals via drag-and-drop.
+- **Features:**
+    - **Hysteresis Compensation:** Prevent signal jitter at boundary points.
+    - **Export:** Serialize switch points into Bitmasks or PLC-compatible arrays.
+
 ---
 
 ## 🔮 Phase 5: Advanced Math (Future)
@@ -71,6 +78,13 @@ This document outlines the architectural evolution of the Quintic Cam Editor, fr
 
 ### 5.2 Spline Interpolation
 - **Solution:** Implement **B-Splines (Cubic/Quintic)** for smooth curve fitting through point clouds.
+
+### 5.3 Kinematic Analysis Dashboard
+- **Goal:** Quantified "Crash Prevention" report, benchmarking Siemens SIZER or Beckhoff TC3 Motion Designer.
+- **Metrics:**
+    - **RMS Acceleration:** Calculate Root Mean Square acceleration to evaluate motor thermal load.
+    - **Peak Jerk Monitoring:** Identify maximum jerk ($J$) locations to warn of potential mechanical resonance.
+    - **Power Prediction:** Estimate instantaneous power demand based on user-input load inertia to prevent drive "Overcurrent" errors.
 
 ---
 
