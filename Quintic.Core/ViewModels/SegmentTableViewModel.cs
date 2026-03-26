@@ -106,8 +106,15 @@ namespace Quintic.Wpf.ViewModels
         {
             if (obj is Segment segment)
             {
-                // Placeholder for dialog logic
-                System.Windows.MessageBox.Show($"Edit Control Points for Segment {segment.Id}\n(Feature to be implemented with a dialog window)", "Edit Control Points");
+                var editor = new Quintic.Wpf.Views.ControlPointEditorWindow(segment.ControlPoints);
+                if (editor.ShowDialog() == true)
+                {
+                    // Force property change notification to trigger recalculation
+                    // Since we modified the list content in-place, the Segment.ControlPoints property setter wasn't called.
+                    // We re-assign the list to itself (or a copy) to trigger OnPropertyChanged("ControlPoints")
+                    var updatedList = new System.Collections.Generic.List<CamPoint>(segment.ControlPoints);
+                    segment.ControlPoints = updatedList;
+                }
             }
         }
 

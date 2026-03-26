@@ -53,6 +53,8 @@ namespace Quintic.Wpf.Core.Models
         public double A { get; set; }
         public double J { get; set; }
 
+        public CamPoint() { }
+
         public CamPoint(double theta, double s, double v, double a, double j)
         {
             Theta = theta;
