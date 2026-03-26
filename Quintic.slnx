@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="Quintic.Core/Quintic.Core.csproj" />
   <Project Path="Quintic.Wpf/Quintic.Wpf.csproj" />
 </Solution>
