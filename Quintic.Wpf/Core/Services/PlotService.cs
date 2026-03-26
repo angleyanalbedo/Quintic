@@ -13,11 +13,54 @@ namespace Quintic.Wpf.Core.Services
         public PlotModel SPlotModel { get; private set; }
         public PlotModel VAPlotModel { get; private set; }
 
+        public event System.Action<int, double, double> PointDragged;
+
         private bool _isSyncingAxes = false;
+        private int _dragIndex = -1;
 
         public PlotService()
         {
             InitializePlots();
+            
+            // Hook up interaction events
+            SPlotModel.MouseDown += OnSPlotMouseDown;
+            SPlotModel.MouseMove += OnSPlotMouseMove;
+            SPlotModel.MouseUp += OnSPlotMouseUp;
+        }
+
+        private void OnSPlotMouseDown(object sender, OxyMouseEventArgs e)
+        {
+            if (e.ChangedButton != OxyMouseButton.Left) return;
+
+            var series = SPlotModel.Series.OfType<ScatterSeries>().FirstOrDefault();
+            if (series == null) return;
+
+            var nearest = series.GetNearestPoint(e.Position, false);
+            if (nearest != null && nearest.Distance < 15)
+            {
+                _dragIndex = (int)nearest.Index;
+                e.Handled = true;
+                SPlotModel.InvalidatePlot(false);
+            }
+        }
+
+        private void OnSPlotMouseMove(object sender, OxyMouseEventArgs e)
+        {
+            if (_dragIndex >= 0)
+            {
+                var series = SPlotModel.Series.OfType<ScatterSeries>().FirstOrDefault();
+                if (series != null)
+                {
+                    var dataPoint = series.InverseTransform(e.Position);
+                    PointDragged?.Invoke(_dragIndex, dataPoint.X, dataPoint.Y);
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private void OnSPlotMouseUp(object sender, OxyMouseEventArgs e)
+        {
+            _dragIndex = -1;
         }
 
         public void ResetAxes()
@@ -42,7 +85,9 @@ namespace Quintic.Wpf.Core.Services
 
         public void UpdateLimitLines(double maxV, double maxA)
         {
-            VAPlotModel.Annotations.Clear();
+            // Remove old limit lines only (keep rectangles if any, or clear all? Let's clear lines)
+            var oldLines = VAPlotModel.Annotations.Where(a => a is LineAnnotation).ToList();
+            foreach (var a in oldLines) VAPlotModel.Annotations.Remove(a);
 
             // Velocity Limits (+/-)
             var vLimitColor = OxyColor.FromAColor(60, OxyColors.Red);
@@ -53,6 +98,58 @@ namespace Quintic.Wpf.Core.Services
             var aLimitColor = OxyColor.FromAColor(60, OxyColors.OrangeRed);
             VAPlotModel.Annotations.Add(new LineAnnotation { Type = LineAnnotationType.Horizontal, Y = maxA, Color = aLimitColor, StrokeThickness = 1, LineStyle = LineStyle.Dash, YAxisKey = "A", Text = "A Max" });
             VAPlotModel.Annotations.Add(new LineAnnotation { Type = LineAnnotationType.Horizontal, Y = -maxA, Color = aLimitColor, StrokeThickness = 1, LineStyle = LineStyle.Dash, YAxisKey = "A" });
+
+            VAPlotModel.InvalidatePlot(true);
+        }
+
+        public void HighlightLimitViolations(CalculationResponse response, double maxV, double maxA)
+        {
+            // Clear old violation rectangles
+            var oldRects = VAPlotModel.Annotations.Where(a => a is RectangleAnnotation && (string)a.Tag == "Violation").ToList();
+            foreach (var a in oldRects) VAPlotModel.Annotations.Remove(a);
+
+            if (response == null || response.Points == null) return;
+
+            void AddViolation(double startX, double endX, string axisKey)
+            {
+                VAPlotModel.Annotations.Add(new RectangleAnnotation
+                {
+                    MinimumX = startX,
+                    MaximumX = endX,
+                    Fill = OxyColor.FromAColor(40, OxyColors.Red),
+                    YAxisKey = axisKey,
+                    Tag = "Violation",
+                    Layer = AnnotationLayer.BelowSeries
+                });
+            }
+
+            // Scan Velocity
+            double? startV = null;
+            foreach (var p in response.Points)
+            {
+                bool isOver = System.Math.Abs(p.V) > maxV;
+                if (isOver && startV == null) startV = p.Theta;
+                else if (!isOver && startV != null)
+                {
+                    AddViolation(startV.Value, p.Theta, "V");
+                    startV = null;
+                }
+            }
+            if (startV != null) AddViolation(startV.Value, response.Points.Last().Theta, "V");
+
+            // Scan Acceleration
+            double? startA = null;
+            foreach (var p in response.Points)
+            {
+                bool isOver = System.Math.Abs(p.A) > maxA;
+                if (isOver && startA == null) startA = p.Theta;
+                else if (!isOver && startA != null)
+                {
+                    AddViolation(startA.Value, p.Theta, "A");
+                    startA = null;
+                }
+            }
+            if (startA != null) AddViolation(startA.Value, response.Points.Last().Theta, "A");
 
             VAPlotModel.InvalidatePlot(true);
         }

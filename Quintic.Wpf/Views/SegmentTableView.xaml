@@ -66,6 +66,16 @@
                       HeadersVisibility="Column"
                       BorderThickness="0"
                       RowHeight="28">
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsLimitExceeded}" Value="True">
+                                <Setter Property="Background" Value="#40FF0000"/>
+                                <Setter Property="ToolTip" Value="Physical Limit Exceeded (Velocity or Acceleration)"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
                 <DataGrid.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Insert Segment" Command="{Binding AddSegmentCommand}"/>

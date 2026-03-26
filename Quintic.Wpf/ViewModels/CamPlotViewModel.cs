@@ -15,6 +15,8 @@ namespace Quintic.Wpf.ViewModels
         public PlotModel SPlotModel => _plotService.SPlotModel;
         public PlotModel VAPlotModel => _plotService.VAPlotModel;
 
+        public event System.Action<int, double, double> PointDragged;
+
         public ICommand ResetViewCommand { get; private set; }
 
         private bool _isVelocityVisible = true;
@@ -65,6 +67,7 @@ namespace Quintic.Wpf.ViewModels
         public CamPlotViewModel()
         {
             _plotService = new PlotService();
+            _plotService.PointDragged += (i, m, s) => PointDragged?.Invoke(i, m, s);
             ResetViewCommand = new RelayCommand(o => _plotService.ResetAxes());
         }
 
@@ -76,6 +79,11 @@ namespace Quintic.Wpf.ViewModels
         public void UpdateLimits(double maxV, double maxA)
         {
             _plotService.UpdateLimitLines(maxV, maxA);
+        }
+
+        public void HighlightViolations(CalculationResponse response, double maxV, double maxA)
+        {
+            _plotService.HighlightLimitViolations(response, maxV, maxA);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

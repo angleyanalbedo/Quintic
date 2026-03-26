@@ -67,6 +67,9 @@ namespace Quintic.Wpf.ViewModels
 
             // Subscribe to changes in TableVM to trigger Recalculate
             SegmentTableVM.SegmentsChanged += (s, e) => Recalculate();
+            
+            // Handle Dragging
+            CamPlotVM.PointDragged += OnCamPointDragged;
 
             SaveProjectCommand = new RelayCommand(ExecuteSaveProject);
             OpenProjectCommand = new RelayCommand(ExecuteOpenProject);
@@ -211,6 +214,31 @@ namespace Quintic.Wpf.ViewModels
             }
         }
 
+        private void OnCamPointDragged(int index, double newM, double newS)
+        {
+            if (index < 0 || index >= SegmentTableVM.Segments.Count) return;
+
+            var seg = SegmentTableVM.Segments[index];
+            var prevM = seg.ComputedMasterStart ?? 0;
+            var prevS = seg.ComputedSlaveStart ?? 0;
+
+            // Constraint: Master must be > Start
+            if (newM <= prevM) newM = prevM + 0.1;
+
+            // Update Model based on Coordinate Mode
+            if (seg.CoordinateMode == CoordinateMode.Absolute)
+            {
+                seg.MasterVal = newM;
+                seg.SlaveVal = newS;
+            }
+            else
+            {
+                seg.MasterVal = newM - prevM;
+                seg.SlaveVal = newS - prevS;
+            }
+            // PropertyChanged will trigger Recalculate via SegmentTableVM listener
+        }
+
         private void Recalculate()
         {
             RecordSnapshot();
@@ -220,6 +248,7 @@ namespace Quintic.Wpf.ViewModels
             double currentS = 0;
             foreach (var seg in SegmentTableVM.Segments)
             {
+                seg.IsLimitExceeded = false; // Reset flag
                 seg.ComputedMasterStart = currentM;
                 seg.ComputedSlaveStart = currentS;
                 
@@ -243,8 +272,6 @@ namespace Quintic.Wpf.ViewModels
             {
                 if (seg.ComputedMasterEnd <= seg.ComputedMasterStart)
                 {
-                    // Invalid segment configuration (End <= Start)
-                    // Stop calculation to prevent crash or invalid graph
                     return;
                 }
             }
@@ -252,9 +279,26 @@ namespace Quintic.Wpf.ViewModels
             // 2. Calculate Profile
             _lastCalculation = CamCalculator.CalculateProject(SegmentTableVM.Segments.ToList(), Config);
             
-            // 3. Update Plots
+            // 3. Check Limits
+            if (_lastCalculation != null)
+            {
+                foreach (var p in _lastCalculation.Points)
+                {
+                    if (Math.Abs(p.V) > LimitVelocity || Math.Abs(p.A) > LimitAcceleration)
+                    {
+                        // Find which segment this point belongs to
+                        var seg = SegmentTableVM.Segments.FirstOrDefault(s => 
+                            p.Theta >= s.ComputedMasterStart && p.Theta <= s.ComputedMasterEnd);
+                        
+                        if (seg != null) seg.IsLimitExceeded = true;
+                    }
+                }
+            }
+
+            // 4. Update Plots
             CamPlotVM.UpdatePlots(_lastCalculation, SegmentTableVM.Segments);
             CamPlotVM.UpdateLimits(LimitVelocity, LimitAcceleration);
+            CamPlotVM.HighlightViolations(_lastCalculation, LimitVelocity, LimitAcceleration);
         }
 
 

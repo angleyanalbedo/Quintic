@@ -25,6 +25,9 @@ namespace Quintic.Wpf.Core.Models
         private double? _computedSlaveStart;
         private double? _computedSlaveEnd;
 
+        // Validation State
+        private bool _isLimitExceeded;
+
         public Segment()
         {
             _id = Guid.NewGuid().ToString();
@@ -119,6 +122,12 @@ namespace Quintic.Wpf.Core.Models
         {
             get => _computedSlaveEnd;
             set { _computedSlaveEnd = value; OnPropertyChanged(); }
+        }
+
+        public bool IsLimitExceeded
+        {
+            get => _isLimitExceeded;
+            set { _isLimitExceeded = value; OnPropertyChanged(); }
         }
 
         /// <summary>
