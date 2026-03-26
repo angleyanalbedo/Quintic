@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Linq;
 using System.Windows.Input;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.IO;
 using Microsoft.Win32;
 
@@ -101,7 +102,11 @@ namespace Quintic.Wpf.ViewModels
                     LimitAcceleration = this.LimitAcceleration
                 };
 
-                var options = new JsonSerializerOptions { WriteIndented = true };
+                var options = new JsonSerializerOptions 
+                { 
+                    WriteIndented = true, 
+                    ReferenceHandler = ReferenceHandler.IgnoreCycles 
+                };
                 var jsonString = JsonSerializer.Serialize(projectState, options);
                 File.WriteAllText(saveFileDialog.FileName, jsonString);
             }
@@ -182,7 +187,12 @@ namespace Quintic.Wpf.ViewModels
                 LimitVelocity = this.LimitVelocity,
                 LimitAcceleration = this.LimitAcceleration
             };
-            var json = JsonSerializer.Serialize(state);
+            
+            var options = new JsonSerializerOptions 
+            { 
+                ReferenceHandler = ReferenceHandler.IgnoreCycles 
+            };
+            var json = JsonSerializer.Serialize(state, options);
 
             // Avoid duplicates
             if (_historyIndex >= 0 && _historyIndex < _history.Count && _history[_historyIndex] == json) return;
