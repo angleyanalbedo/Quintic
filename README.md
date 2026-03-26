@@ -4,6 +4,8 @@ Quintic is a universal industrial electronic cam profile design platform complia
 
 This project is built for automation engineers who demand extreme performance and user experience. It provides a data-intensive, professional dark mode UI, benchmarking the interactive experience of top-tier commercial software such as **Beckhoff TwinCAT 3**, **CODESYS SoftMotion**, and **Siemens TIA Portal**.
 
+![Quintic Cam Editor Screenshot](docs/images/screenshot.png)
+
 ## Core Features
 
 *   **Golden UI Layout**: Classic "Left List + Right Canvas" layout, maximizing widescreen usage, perfectly balancing macroscopic rhythm and microscopic precision.
