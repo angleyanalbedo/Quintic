@@ -50,7 +50,12 @@ namespace Quintic.Wpf.Core.Services
                 double slaveStart = currentSlave;
                 double slaveEnd = 0.0;
 
-                if (seg.CoordinateMode == CoordinateMode.Relative)
+                if (seg.MotionLaw == MotionLawType.Dwell)
+                {
+                    // Force Dwell to have zero displacement to ensure continuity
+                    slaveEnd = slaveStart;
+                }
+                else if (seg.CoordinateMode == CoordinateMode.Relative)
                 {
                     slaveEnd = slaveStart + seg.SlaveVal;
                 }
