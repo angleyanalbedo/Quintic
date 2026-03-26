@@ -1,4 +1,4 @@
-name: Publish to NuGet
+name: Publish to NuGet and Release
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
     environment: Production
     permissions:
       id-token: write # Required for NuGet.org Trusted Publishing
-      contents: read  # Required for actions/checkout
+      contents: write # Required for creating releases
     
     steps:
     - uses: actions/checkout@v4
@@ -30,9 +30,11 @@ jobs:
         nuget-version: 'latest'
           
     - name: Restore dependencies
-      run: dotnet restore Quintic.Core/Quintic.Core.csproj
+      run: |
+        dotnet restore Quintic.Core/Quintic.Core.csproj
+        dotnet restore Quintic.Wpf/Quintic.Wpf.csproj
       
-    - name: Build
+    - name: Build Core
       run: |
         $Version = "${{ github.ref_name }}".TrimStart('v')
         if ("${{ github.ref_type }}" -eq "tag") {
@@ -40,6 +42,13 @@ jobs:
         } else {
             dotnet build Quintic.Core/Quintic.Core.csproj --configuration Release
         }
+      shell: pwsh
+
+    - name: Publish WPF App
+      run: |
+        $Version = "${{ github.ref_name }}".TrimStart('v')
+        dotnet publish Quintic.Wpf/Quintic.Wpf.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./publish /p:Version=$Version
+        Compress-Archive -Path ./publish/* -DestinationPath ./Quintic.Wpf-win-x64.zip
       shell: pwsh
 
     - name: Pack
@@ -76,3 +85,12 @@ jobs:
         foreach($file in (Get-ChildItem "./nupkgs/*.nupkg")) {
             dotnet nuget push $file.FullName --source https://api.nuget.org/v3/index.json --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}" --skip-duplicate
         }
+
+    - name: Create GitHub Release
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          ./nupkgs/*.nupkg
+          ./Quintic.Wpf-win-x64.zip
+        generate_release_notes: true
