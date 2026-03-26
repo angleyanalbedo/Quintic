@@ -132,13 +132,20 @@ namespace Quintic.Wpf.ViewModels
             {
                 try
                 {
+                    // Suppress snapshots during bulk update
+                    _isNavigatingHistory = true;
+
                     var jsonString = File.ReadAllText(openFileDialog.FileName);
                     ApplyState(jsonString);
-                    // Clear history after open? Or treat open as a new state?
-                    // Let's treat it as a new state in history
+                    
+                    _isNavigatingHistory = false;
+
+                    // Record single snapshot for the loaded state
+                    RecordSnapshot();
                 }
                 catch (Exception)
                 {
+                    _isNavigatingHistory = false;
                     // Handle error silently or log
                 }
             }

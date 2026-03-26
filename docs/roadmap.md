@@ -14,9 +14,9 @@ This document outlines the architectural evolution of the Quintic Cam Editor, fr
 - **Scope:** Multi-Segment Support, Vectorized Kernels.
 - **Outcome:** 50x performance boost, clean `api/kernels/services` architecture.
 
-### 2.1 Editor Essentials (Ongoing)
+### 2.1 Editor Essentials (Completed)
 - **Project Persistence:** ✅ Save/Load project state (`.json` / `.quintic`) to preserve segments, config, and view settings.
-- **Undo/Redo Stack:** Essential for trial-and-error design.
+- **Undo/Redo Stack:** ✅ Robust history management with snapshot optimization.
 
 ## ✅ Phase 3: Industrial Motion Kernel (Completed)
 **Focus:** VDI 2143 Advanced Definitions

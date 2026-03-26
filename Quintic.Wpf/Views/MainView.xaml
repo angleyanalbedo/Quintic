@@ -55,7 +55,7 @@
                                 <ColumnDefinition Width="80"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Text="Max Velocity" VerticalAlignment="Center" Foreground="{StaticResource Brush.Text.Primary}" ToolTip="Maximum allowed velocity (mm/s)"/>
-                            <TextBox Grid.Column="1" Text="{Binding LimitVelocity, UpdateSourceTrigger=PropertyChanged}" Padding="4,2" Background="#222" Foreground="White" BorderThickness="0" VerticalContentAlignment="Center"/>
+                            <TextBox Grid.Column="1" Text="{Binding LimitVelocity, UpdateSourceTrigger=LostFocus}" Padding="4,2" Background="#222" Foreground="White" BorderThickness="0" VerticalContentAlignment="Center"/>
                         </Grid>
 
                         <Grid>
@@ -64,7 +64,7 @@
                                 <ColumnDefinition Width="80"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Text="Max Accel" VerticalAlignment="Center" Foreground="{StaticResource Brush.Text.Primary}" ToolTip="Maximum allowed acceleration (mm/s²)"/>
-                            <TextBox Grid.Column="1" Text="{Binding LimitAcceleration, UpdateSourceTrigger=PropertyChanged}" Padding="4,2" Background="#222" Foreground="White" BorderThickness="0" VerticalContentAlignment="Center"/>
+                            <TextBox Grid.Column="1" Text="{Binding LimitAcceleration, UpdateSourceTrigger=LostFocus}" Padding="4,2" Background="#222" Foreground="White" BorderThickness="0" VerticalContentAlignment="Center"/>
                         </Grid>
                     </StackPanel>
                 </Border>
