@@ -5,7 +5,24 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+
+    <!-- NuGet Package Metadata -->
+    <Authors>Quintic</Authors>
+    <Company>Quintic</Company>
+    <Product>Quintic Cam Profile Generator</Product>
+    <Description>A universal industrial electronic cam profile design platform compliant with the VDI 2143 standard. Features high-performance plotting, real-time compilation, and CSV export for motion controllers.</Description>
+    <PackageTags>industrial;motion-control;cam;vdi2143;automation;wpf;oxyplot;plc;siemens;beckhoff;codesys</PackageTags>
+    <Copyright>Copyright (c) 2029 Quintic</Copyright>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE" Pack="true" PackagePath="" />
+    <None Include="..\README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
