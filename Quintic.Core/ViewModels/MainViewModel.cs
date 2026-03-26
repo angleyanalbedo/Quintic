@@ -56,6 +56,7 @@ namespace Quintic.Wpf.ViewModels
         public ICommand SaveProjectCommand { get; private set; }
         public ICommand OpenProjectCommand { get; private set; }
         public ICommand ExportCsvCommand { get; private set; }
+        public ICommand ExportStCommand { get; private set; }
         public ICommand UndoCommand { get; private set; }
         public ICommand RedoCommand { get; private set; }
 
@@ -84,6 +85,7 @@ namespace Quintic.Wpf.ViewModels
             SaveProjectCommand = new RelayCommand(ExecuteSaveProject);
             OpenProjectCommand = new RelayCommand(ExecuteOpenProject);
             ExportCsvCommand = new RelayCommand(ExecuteExportCsv);
+            ExportStCommand = new RelayCommand(ExecuteExportSt);
             UndoCommand = new RelayCommand(ExecuteUndo, o => _historyIndex > 0);
             RedoCommand = new RelayCommand(ExecuteRedo, o => _historyIndex < _history.Count - 1);
             
@@ -240,6 +242,23 @@ namespace Quintic.Wpf.ViewModels
             if (saveFileDialog.ShowDialog() == true)
             {
                 CsvExporter.Export(saveFileDialog.FileName, _lastCalculation);
+            }
+        }
+
+        private void ExecuteExportSt(object obj)
+        {
+            if (_lastCalculation == null || _lastCalculation.Points.Count == 0) return;
+
+            var saveFileDialog = new SaveFileDialog
+            {
+                Filter = "Structured Text (*.st)|*.st|Text File (*.txt)|*.txt",
+                DefaultExt = ".st",
+                FileName = "CamProfile.st"
+            };
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                StCodeGenerator.Export(saveFileDialog.FileName, _lastCalculation);
             }
         }
 
