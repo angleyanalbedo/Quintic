@@ -13,6 +13,8 @@ namespace Quintic.Wpf.Core.Services
             var resolvedSegments = new List<Segment>();
             double currentMaster = 0.0;
             double currentSlave = 0.0;
+            double currentV = 0.0; // Geometric Velocity (ds/dtheta)
+            double currentA = 0.0; // Geometric Acceleration (d2s/dtheta2)
 
             // Determine global speed for Time -> Master conversion
             // RPM * 360 / 60 = deg/s
@@ -65,11 +67,56 @@ namespace Quintic.Wpf.Core.Services
                 resolvedSeg.ComputedSlaveStart = slaveStart;
                 resolvedSeg.ComputedSlaveEnd = slaveEnd;
 
+                // --- Continuity Logic ---
+                // Inherit start conditions from previous segment
+                resolvedSeg.StartVelocity = currentV;
+                resolvedSeg.StartAcceleration = currentA;
+
+                // Calculate End Conditions for the next segment
+                double duration = masterEnd - masterStart;
+                double height = slaveEnd - slaveStart;
+                double nextV = 0.0;
+                double nextA = 0.0;
+
+                switch (seg.MotionLaw)
+                {
+                    case MotionLawType.ConstantVelocity:
+                        if (Math.Abs(duration) > 1e-9)
+                            nextV = height / duration;
+                        else
+                            nextV = 0;
+                        nextA = 0;
+                        break;
+
+                    case MotionLawType.Polynomial5:
+                        // For Poly5, End V/A are user inputs (or 0 if not set)
+                        nextV = seg.EndVelocity;
+                        nextA = seg.EndAcceleration;
+                        break;
+
+                    case MotionLawType.Cycloidal:
+                    case MotionLawType.ModifiedTrapezoid:
+                    case MotionLawType.ModifiedSine:
+                    case MotionLawType.Dwell:
+                    default:
+                        // Standard laws typically end at rest (V=0, A=0)
+                        nextV = 0;
+                        nextA = 0;
+                        break;
+                }
+
+                // Store calculated end conditions back into the resolved segment
+                // (Important for Poly5 if we want to use them, and for debugging)
+                resolvedSeg.EndVelocity = nextV;
+                resolvedSeg.EndAcceleration = nextA;
+
                 resolvedSegments.Add(resolvedSeg);
 
                 // Update state for next iteration
                 currentMaster = masterEnd;
                 currentSlave = slaveEnd;
+                currentV = nextV;
+                currentA = nextA;
             }
 
             return resolvedSegments;
@@ -132,8 +179,10 @@ namespace Quintic.Wpf.Core.Services
                         break;
                     case MotionLawType.Polynomial5:
                     default:
-                        // Default to Poly5
-                        kernel = new Polynomial5(mStart, mEnd, sStart, sEnd);
+                        // Default to Poly5 with boundary conditions
+                        kernel = new Polynomial5(mStart, mEnd, sStart, sEnd, 
+                                                 segment.StartVelocity, segment.EndVelocity,
+                                                 segment.StartAcceleration, segment.EndAcceleration);
                         break;
                 }
 
