@@ -122,7 +122,7 @@
                     <DataGridTemplateColumn Width="40">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Command="{Binding DataContext.EditControlPointsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                <Button Command="{Binding DataContext.EditControlPointsCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
                                         CommandParameter="{Binding}"
                                         Content="..." 
                                         ToolTip="Edit Control Points"
