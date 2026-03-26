@@ -32,24 +32,28 @@ This document outlines the architectural evolution of the Quintic Cam Editor, fr
 
 ## 🔮 Phase 4: Interaction & Integration (Next Priority)
 
-### 3.2 画布控制点拖拽 (Canvas Dragging)
-- **Goal:** 在 S 曲线的分段交界处渲染可交互的“控制点”。
-- **Implementation:** 实现鼠标拖动控制点时，反向更新 DataGrid 里的数值，并实时扭动 V/A/J 曲线。
+### 4.1 Canvas Dragging (Interactive Control Points)
+- **Goal:** Render interactive "Control Points" at segment junctions on the S-curve.
+- **Status:** Not Implemented. (Static `ScatterSeries` exists in `PlotService.cs`, but no mouse event handling or reverse data binding).
+- **Implementation:** Implement mouse drag events to update `Segment` data in real-time and recalculate V/A/J curves.
 
-### 3.3 全局物理极限与超限报警 (Limit Validation)
-- **Goal:** 增加全局配置区：输入伺服电机的物理极限（$V_{max}, A_{max}$）。
-- **Visual Feedback:** 越界视觉反馈：当算出的曲线超限时，导数图表中的违规区域高亮为红色，同时 DataGrid 对应行闪烁警告。
+### 4.2 Global Physical Limits & Alarm (Limit Validation)
+- **Goal:** Global configuration for servo motor physical limits ($V_{max}, A_{max}$).
+- **Status:** Partially Implemented. (Reference lines exist in `PlotService.cs`, `MainViewModel.cs` has properties).
+- **Missing:** Advanced visual feedback.
+    - **Charts:** Highlight violating regions in red on V/A plots.
+    - **Grid:** Flash or highlight corresponding rows in the DataGrid.
 
-### 4.1 高密度点表导出 (Raw Profile Export) ✅
-- **Goal:** 支持一键导出 .csv 文件，适配基础单片机、自研运动板卡或查表型 PLC 的执行需求。
-- **Status:** 已完成 (CsvExporter).
+### 4.3 Raw Profile Export (High Density CSV) ✅
+- **Goal:** One-click export to .csv for microcontrollers or table-based PLCs.
+- **Status:** Completed (`CsvExporter`).
 
-### 4.2 结构化文本生成 (ST Code Generation)
-- **Goal:** 结合 PLC ST 分析与生成工具经验，将凸轮数据直接翻译成符合 IEC 61131-3 标准的 ARRAY 代码块。
+### 4.4 Structured Text Generation (ST Code)
+- **Goal:** Generate IEC 61131-3 compliant ARRAY code blocks directly from cam data.
 
-### 4.3 宿主 IDE 集成接口 (API for Host IDE)
-- **Goal:** 将整个 WPF 窗体封装为通用控件（UserControl）或类库。
-- **Integration:** 提供对外接口，确保未来只需一行代码，即可将该凸轮编辑器无缝内嵌至 CASS 工业自动化 IDE 中。
+### 4.5 Host IDE Integration API
+- **Goal:** Encapsulate the WPF window as a generic UserControl or Class Library.
+- **Integration:** Provide an external API to embed the cam editor into the CASS Industrial Automation IDE with a single line of code.
 
 ---
 
