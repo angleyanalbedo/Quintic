@@ -36,10 +36,10 @@ Quintic has evolved from a web-based MVP (Python/React) into a high-performance 
 *Namespace: `Quintic.Wpf.Core`*
 - **Models:** `Segment`, `ProjectConfig`, `CamPoint`.
     - **Smart Segments:** `INotifyPropertyChanged` built-in. Changing `MasterEnd` triggers recalculation immediately.
-- **Kernels:** `IMotionKernel` interface.
-    - `Polynomial5.cs`
-    - `Cycloidal.cs`
-    - `ModifiedTrapezoid.cs`
+- **Kernels:** `IMotionKernel` interface & `BaseMotionKernel` abstract class.
+    - `Polynomial5.cs` / `Polynomial7.cs`
+    - `Cycloidal.cs` / `SimpleSine.cs` / `Gutman.cs`
+    - `ModifiedTrapezoid.cs` / `SevenSegment.cs`
     - `ConstantVelocity.cs`
     - `Dwell.cs`
 - **Services:**
