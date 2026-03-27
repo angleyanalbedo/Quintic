@@ -22,6 +22,7 @@ This project is built for automation engineers who demand extreme performance an
 *   **History Management**: Full Undo/Redo support for safe experimentation.
 *   **CSV Export**: One-click export of high-precision point tables, supporting direct import into mainstream motion controllers like Siemens, Beckhoff, and Omron.
 *   **ST Code Generation**: Generate IEC 61131-3 compliant Structured Text (ST) arrays for direct PLC integration.
+*   **Discrete Logic Tracks**: Define multi-channel IO switch points synchronized with motion, supporting hysteresis compensation.
 *   **Host Integration API**: Available as a NuGet package (`Quintic.Core`) for embedding the editor into custom HMI or Industrial IDEs.
 *   **Professional Visuals**: Comes with a modern dark theme (charcoal background + electric blue/orange highlights) to reduce visual fatigue for engineers working long hours.
 
@@ -62,6 +63,7 @@ Add the namespace and control to your XAML:
 *   **Interactive Canvas**:
     *   **Add Point**: Hold **`Ctrl + Left Click`** anywhere on the curve to split the segment and insert a new control point.
     *   **Edit Point**: Drag existing control points to adjust the profile in real-time.
+*   **Logic Tracks**: Manage digital output tracks in the bottom panel. Add tracks and define switch intervals synchronized with the master position.
 
 ## Developer Setup (Source Code)
 
