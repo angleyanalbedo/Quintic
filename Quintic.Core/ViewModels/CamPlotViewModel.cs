@@ -88,7 +88,7 @@ namespace Quintic.Wpf.ViewModels
         {
             TracksPlotModel = new PlotModel
             {
-                PlotMargins = new OxyThickness(40, 0, 20, 10),
+                PlotMargins = new OxyThickness(40, 5, 20, 30),
                 Background = OxyColors.Transparent,
                 TextColor = OxyColors.White
             };
