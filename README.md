@@ -13,6 +13,7 @@ This project is built for automation engineers who demand extreme performance an
     *   **Polynomial 5**: The most common Rest-in-Rest curve.
     *   **Cycloidal**: Suitable for high-speed, low-vibration applications.
     *   **Modified Trapezoid**: Finite jerk, extremely smooth.
+    *   **B-Spline**: Cubic spline interpolation for smooth curve fitting through arbitrary points.
     *   **Constant Velocity / Dwell**: Basic linear and dwell segments.
 *   **High-Performance Plotting**: Industrial-grade curve rendering based on `OxyPlot`, supporting smooth zooming and panning of hundreds of thousands of points.
 *   **Real-time Compilation**: WYSIWYG interactive experience; modifying table data triggers millisecond-level recalculation and instant curve refresh.
@@ -20,6 +21,8 @@ This project is built for automation engineers who demand extreme performance an
 *   **Safety First**: Global physical limit validation ($V_{max}, A_{max}$) with real-time visual alarms on charts and data grids.
 *   **History Management**: Full Undo/Redo support for safe experimentation.
 *   **CSV Export**: One-click export of high-precision point tables, supporting direct import into mainstream motion controllers like Siemens, Beckhoff, and Omron.
+*   **ST Code Generation**: Generate IEC 61131-3 compliant Structured Text (ST) arrays for direct PLC integration.
+*   **Host Integration API**: Available as a NuGet package (`Quintic.Core`) for embedding the editor into custom HMI or Industrial IDEs.
 *   **Professional Visuals**: Comes with a modern dark theme (charcoal background + electric blue/orange highlights) to reduce visual fatigue for engineers working long hours.
 
 ## Tech Stack
