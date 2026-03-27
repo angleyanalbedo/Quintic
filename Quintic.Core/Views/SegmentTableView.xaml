@@ -178,6 +178,19 @@
                         <DataGridComboBoxColumn.Header>
                             <TextBlock Text="Law" ToolTip="Motion Law / Curve Type"/>
                         </DataGridComboBoxColumn.Header>
+                        <DataGridComboBoxColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="#252526"/>
+                                        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGridComboBoxColumn.CellStyle>
                         <DataGridComboBoxColumn.ElementStyle>
                             <Style TargetType="ComboBox" BasedOn="{StaticResource DarkComboBoxStyle}">
                                 <Setter Property="IsHitTestVisible" Value="False"/>
