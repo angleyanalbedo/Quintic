@@ -84,11 +84,28 @@ This document outlines the architectural evolution of the Quintic Cam Editor, fr
 - **Status:** Completed (`BSpline`).
 
 ### 5.3 Kinematic Analysis Dashboard
-- **Goal:** Quantified "Crash Prevention" report, benchmarking Siemens SIZER or Beckhoff TC3 Motion Designer.
-- **Metrics:**
-    - **RMS Acceleration:** Calculate Root Mean Square acceleration to evaluate motor thermal load.
-    - **Peak Jerk Monitoring:** Identify maximum jerk ($J$) locations to warn of potential mechanical resonance.
-    - **Power Prediction:** Estimate instantaneous power demand based on user-input load inertia to prevent drive "Overcurrent" errors.
+**Goal:** Quantified "Crash Prevention" report, benchmarking Siemens SIZER or Beckhoff TC3 Motion Designer.
+
+#### Phase 1: Physics Engine & Core Math
+- **Multi-Inertia Modeling:** Calculate equivalent inertia $J_{total} = J_{motor} + J_{load}/i^2$.
+- **Friction Models:** Implement Coulomb + Viscous friction ($T_{friction} = T_c \cdot \text{sgn}(\omega) + b \cdot \omega$).
+- **Key Metrics:**
+    - **RMS Acceleration:** $\sqrt{\frac{1}{T} \int a(t)^2 dt}$ for motor thermal load evaluation.
+    - **Power Prediction:** Real-time $P(t) = T(t) \cdot \omega(t)$ to prevent drive overcurrent.
+
+#### Phase 2: Visual KPI Cards & Real-time Alerts
+- **Health View:**
+    - **RMS Thermal Load Bar:** Display load percentage vs. rated capacity.
+    - **Peak Torque Gauge:** Warn if $T_{peak} > 90\% T_{max}$.
+- **Diagnostics Log:** Auto-detect mechanical resonance risks (High Jerk) and drive capacity issues.
+
+#### Phase 3: Advanced Plotting & Simulation
+- **T-N Curve Overlays:** Scatter plot of Torque vs. Speed with S1 (Continuous) and S3 (Intermittent) operation boundaries.
+- **Dynamic Toggles:** Checkboxes for Torque, Power, and Regenerative Energy curves.
+- **Sync Cursor:** Crosshair showing instantaneous Torque/Power on the position curve.
+
+#### Phase 4: Automated Reporting
+- **PDF Generation:** One-click export of "Crash Prevention" reports with KPI summaries, danger zone screenshots, and sizing recommendations.
 
 ---
 
