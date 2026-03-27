@@ -15,7 +15,7 @@ using Quintic.Wpf.Core.Commands;
 
 namespace Quintic.Wpf.ViewModels
 {
-    public class MainViewModel : INotifyPropertyChanged
+    public class CamEditorViewModel : INotifyPropertyChanged
     {
         public class ProjectStateDto
         {
@@ -62,7 +62,7 @@ namespace Quintic.Wpf.ViewModels
 
         private CalculationResponse _lastCalculation;
 
-        public MainViewModel()
+        public CamEditorViewModel()
         {
             Config = new ProjectConfig { Resolution = 1000 };
             

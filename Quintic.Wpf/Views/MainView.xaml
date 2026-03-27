@@ -12,7 +12,7 @@
         WindowStartupLocation="CenterScreen">
 
     <Window.DataContext>
-        <vm:MainViewModel/>
+        <vm:CamEditorViewModel/>
     </Window.DataContext>
 
     <views:CamEditorView/>
