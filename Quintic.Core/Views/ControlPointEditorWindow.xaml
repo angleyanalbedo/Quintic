@@ -50,9 +50,10 @@
                   RowHeight="28"
                   Background="Transparent">
             <DataGrid.Resources>
-                <Style TargetType="TextBox">
+                <Style x:Key="EditingTextBoxStyle" TargetType="TextBox">
                     <Setter Property="Background" Value="#252526"/>
                     <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="CaretBrush" Value="White"/>
                     <Setter Property="BorderThickness" Value="0"/>
                 </Style>
             </DataGrid.Resources>
@@ -68,8 +69,8 @@
                 </Style>
             </DataGrid.CellStyle>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Master Offset" Binding="{Binding Theta}" Width="*"/>
-                <DataGridTextColumn Header="Slave Offset" Binding="{Binding S}" Width="*"/>
+                <DataGridTextColumn Header="Master Offset" Binding="{Binding Theta}" Width="*" EditingElementStyle="{StaticResource EditingTextBoxStyle}"/>
+                <DataGridTextColumn Header="Slave Offset" Binding="{Binding S}" Width="*" EditingElementStyle="{StaticResource EditingTextBoxStyle}"/>
             </DataGrid.Columns>
         </DataGrid>
 
