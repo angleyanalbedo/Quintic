@@ -47,7 +47,14 @@ namespace Quintic.Wpf.Core.Models
         public MotionLawType MotionLaw
         {
             get => _motionLaw;
-            set { _motionLaw = value; OnPropertyChanged(); }
+            set 
+            {
+                if (_motionLaw != value)
+                {
+                    _motionLaw = value; 
+                    OnPropertyChanged(); 
+                }
+            }
         }
 
         public CoordinateMode CoordinateMode

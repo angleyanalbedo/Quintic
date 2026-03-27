@@ -49,6 +49,14 @@ namespace Quintic.Wpf.ViewModels
 
         private void OnSegmentsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            if (e.Action == NotifyCollectionChangedAction.Reset)
+            {
+                // When list is cleared, we can't easily detach from old items as they are not provided.
+                // But we must ensure we trigger the change event.
+                SegmentsChanged?.Invoke(this, EventArgs.Empty);
+                return;
+            }
+
             if (e.NewItems != null)
             {
                 foreach (Segment item in e.NewItems)
@@ -64,7 +72,7 @@ namespace Quintic.Wpf.ViewModels
 
         private void OnSegmentPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName.StartsWith("Computed")) return;
+            if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName.StartsWith("Computed")) return;
             SegmentsChanged?.Invoke(this, EventArgs.Empty);
         }
 
