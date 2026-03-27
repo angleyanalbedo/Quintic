@@ -23,6 +23,20 @@
     <PackageProjectUrl>https://github.com/angleyanalbedo/Quintic</PackageProjectUrl>
     <PackageReleaseNotes># Release Notes
 
+## v0.6.0 - Integration &amp; Logic Tracks
+**Date:** 2026-03-27
+
+### 🚀 New Features
+- **Discrete Logic Tracks**: Added multi-channel IO switch management synchronized with master position. Supports hysteresis compensation and visual editing.
+- **B-Spline Interpolation**: Implemented Cubic Spline kernel for smooth curve fitting through arbitrary control points.
+- **ST Code Generation**: Export cam profiles as IEC 61131-3 Structured Text arrays for direct PLC integration.
+- **Host Integration API**: Refactored core components into `Quintic.Core` library for easy embedding into third-party HMI/IDE applications.
+
+### 🛠 Improvements
+- **UI/UX**: Added Logic Tracks panel to the editor interface.
+- **Visualization**: Enhanced plot view to display logic tracks aligned with motion curves.
+- **Architecture**: Decoupled WPF views from the main application for better reusability.
+
 ## v0.5.0 - Advanced Motion Kernels
 **Date:** 2026-03-26
 
