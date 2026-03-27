@@ -59,7 +59,15 @@ namespace Quintic.Wpf.ViewModels
         private PlotModel _torqueSpeedModel;
         public PlotModel TorqueSpeedModel
         {
-            get => _torqueSpeedModel;
+            get
+            {
+                // Prevent "PlotModel is already in use" exception when reopening the window
+                if (_torqueSpeedModel != null && _torqueSpeedModel.PlotView != null)
+                {
+                    _torqueSpeedModel = CreateTorqueSpeedModel();
+                }
+                return _torqueSpeedModel;
+            }
             set { _torqueSpeedModel = value; OnPropertyChanged(); }
         }
 
@@ -156,7 +164,7 @@ namespace Quintic.Wpf.ViewModels
             RmsTorque = Math.Sqrt(sumSqT / _lastResponse.Points.Count);
             PeakPower = maxP;
 
-            UpdateTorqueSpeedPlot();
+            TorqueSpeedModel = CreateTorqueSpeedModel();
 
             // KPI Calculations
             RmsLoadPercentage = (RatedTorque > 0) ? (RmsTorque / RatedTorque) * 100 : 0;
@@ -178,12 +186,14 @@ namespace Quintic.Wpf.ViewModels
             if (string.IsNullOrEmpty(DiagnosticsLog)) DiagnosticsLog = "System Healthy";
         }
 
-        private void UpdateTorqueSpeedPlot()
+        private PlotModel CreateTorqueSpeedModel()
         {
             var model = new PlotModel { Title = "Torque vs Speed (T-N Curve)" };
             
             model.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Title = "Velocity", Unit = "units/s" });
             model.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "Torque", Unit = "Nm" });
+
+            if (_lastResponse == null || _config == null) return model;
 
             // S1 Limit (Continuous)
             if (RatedTorque > 0)
@@ -234,7 +244,7 @@ namespace Quintic.Wpf.ViewModels
             }
 
             model.Series.Add(scatterSeries);
-            TorqueSpeedModel = model;
+            return model;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
