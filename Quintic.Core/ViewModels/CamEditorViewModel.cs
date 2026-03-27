@@ -21,12 +21,14 @@ namespace Quintic.Wpf.ViewModels
         {
             public ProjectConfig Config { get; set; }
             public List<Segment> Segments { get; set; }
+            public List<CamTrack> LogicTracks { get; set; }
             public double LimitVelocity { get; set; }
             public double LimitAcceleration { get; set; }
         }
 
         public ToolbarViewModel ToolbarVM { get; set; }
         public SegmentTableViewModel SegmentTableVM { get; set; }
+        public LogicTracksViewModel LogicTracksVM { get; set; }
         public CamPlotViewModel CamPlotVM { get; set; }
         
         public ProjectConfig Config { get; set; }
@@ -67,6 +69,7 @@ namespace Quintic.Wpf.ViewModels
             Config = new ProjectConfig { Resolution = 1000 };
             
             SegmentTableVM = new SegmentTableViewModel();
+            LogicTracksVM = new LogicTracksViewModel();
             CamPlotVM = new CamPlotViewModel();
 
             // Subscribe to changes in TableVM to trigger Recalculate
@@ -109,6 +112,7 @@ namespace Quintic.Wpf.ViewModels
                 {
                     Config = this.Config,
                     Segments = this.SegmentTableVM.Segments.ToList(),
+                    LogicTracks = this.LogicTracksVM.Tracks.ToList(),
                     LimitVelocity = this.LimitVelocity,
                     LimitAcceleration = this.LimitAcceleration
                 };
@@ -193,6 +197,15 @@ namespace Quintic.Wpf.ViewModels
                 {
                     this.SegmentTableVM.Segments.Add(seg);
                 }
+
+                this.LogicTracksVM.Tracks.Clear();
+                if (projectState.LogicTracks != null)
+                {
+                    foreach (var track in projectState.LogicTracks)
+                    {
+                        this.LogicTracksVM.Tracks.Add(track);
+                    }
+                }
             }
         }
 
@@ -204,6 +217,7 @@ namespace Quintic.Wpf.ViewModels
             {
                 Config = this.Config,
                 Segments = this.SegmentTableVM.Segments.ToList(),
+                LogicTracks = this.LogicTracksVM.Tracks.ToList(),
                 LimitVelocity = this.LimitVelocity,
                 LimitAcceleration = this.LimitAcceleration
             };
