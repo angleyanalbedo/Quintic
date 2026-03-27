@@ -49,6 +49,24 @@
                   BorderThickness="0"
                   RowHeight="28"
                   Background="Transparent">
+            <DataGrid.Resources>
+                <Style TargetType="TextBox">
+                    <Setter Property="Background" Value="#252526"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                </Style>
+            </DataGrid.Resources>
+            <DataGrid.CellStyle>
+                <Style TargetType="DataGridCell">
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="#505050"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="BorderBrush" Value="Transparent"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.CellStyle>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Master Offset" Binding="{Binding Theta}" Width="*"/>
                 <DataGridTextColumn Header="Slave Offset" Binding="{Binding S}" Width="*"/>
