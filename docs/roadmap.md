@@ -57,9 +57,10 @@ This document outlines the architectural evolution of the Quintic Cam Editor, fr
 - **Goal:** Generate IEC 61131-3 compliant ARRAY code blocks directly from cam data.
 - **Status:** Completed (`StCodeGenerator`).
 
-### 4.6 Host IDE Integration API
+### 4.6 Host IDE Integration API ✅
 - **Goal:** Encapsulate the WPF window as a generic UserControl or Class Library.
 - **Integration:** Provide an external API to embed the cam editor into the CASS Industrial Automation IDE with a single line of code.
+- **Status:** Completed (`Quintic.Core` library separation).
 
 ### 4.7 Discrete Logic Tracks (Cam Switch / PLS)
 - **Goal:** Microsecond-level synchronization of Motion and IO.
@@ -77,8 +78,9 @@ This document outlines the architectural evolution of the Quintic Cam Editor, fr
 - **Problem:** Currently, users must manually ensure $V_{end}$ of Segment A matches $V_{start}$ of Segment B.
 - **Solution:** Implemented forward propagation of $V$ and $A$ boundary conditions in `CamCalculator`.
 
-### 5.2 Spline Interpolation
+### 5.2 Spline Interpolation ✅
 - **Solution:** Implement **B-Splines (Cubic/Quintic)** for smooth curve fitting through point clouds.
+- **Status:** Completed (`BSpline`).
 
 ### 5.3 Kinematic Analysis Dashboard
 - **Goal:** Quantified "Crash Prevention" report, benchmarking Siemens SIZER or Beckhoff TC3 Motion Designer.
