@@ -29,7 +29,38 @@ This project is built for automation engineers who demand extreme performance an
 *   **Architecture Pattern**: MVVM (Model-View-ViewModel) + Command Pattern
 *   **Math Core**: C# Native Implementation (Ported from Python NumPy kernels)
 
-## Quick Start
+## Installation & Integration
+
+### 1. Standalone Application
+For end-users, simply download the latest executable (`.exe`) from the **[GitHub Releases](https://github.com/angleyanalbedo/Quintic/releases)** page. No installation required.
+
+### 2. WPF Integration (NuGet)
+For developers integrating the editor into an HMI or Industrial IDE:
+
+```bash
+Install-Package Quintic.Core
+```
+
+Add the namespace and control to your XAML:
+
+```xml
+<Window ...
+        xmlns:q="clr-namespace:Quintic.Wpf.Views;assembly=Quintic.Core">
+    
+    <!-- Embed the full editor -->
+    <q:CamEditorView />
+    
+</Window>
+```
+
+## Basic Usage
+
+*   **Segment Table**: Use the left-side data grid to configure motion laws (Poly5, Cycloidal, etc.) and target coordinates manually.
+*   **Interactive Canvas**:
+    *   **Add Point**: Hold **`Ctrl + Left Click`** anywhere on the curve to split the segment and insert a new control point.
+    *   **Edit Point**: Drag existing control points to adjust the profile in real-time.
+
+## Developer Setup (Source Code)
 
 1.  Open the `Quintic.sln` solution.
 2.  Restore NuGet packages:
