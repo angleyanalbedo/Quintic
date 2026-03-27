@@ -75,6 +75,14 @@ namespace Quintic.Wpf.ViewModels
         public CamPlotViewModel()
         {
             _plotService = new PlotService();
+
+            // Lock Y-Axis zooming/panning for S-Curve to match V/A/J plots
+            foreach (var axis in _plotService.SPlotModel.Axes.Where(a => a.Position == AxisPosition.Left || a.Position == AxisPosition.Right))
+            {
+                axis.IsZoomEnabled = false;
+                axis.IsPanEnabled = false;
+            }
+
             _plotService.PointDragged += (i, m, s) => PointDragged?.Invoke(i, m, s);
             _plotService.CanvasCtrlClicked += (m, s) => CanvasCtrlClicked?.Invoke(m, s);
             _plotService.DragStarted += () => DragStarted?.Invoke();
