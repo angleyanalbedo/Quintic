@@ -25,10 +25,6 @@
         </Style>
 
         <Style x:Key="DarkComboBoxStyle" TargetType="ComboBox">
-            <Style.Resources>
-                <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#252526"/>
-                <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#F0F0F0"/>
-            </Style.Resources>
             <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
             <Setter Property="Background" Value="#252526"/>
             <Setter Property="BorderBrush" Value="#555555"/>
@@ -105,6 +101,8 @@
                       RowHeight="28"
                       Background="Transparent">
                 <DataGrid.Resources>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#252526"/>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#F0F0F0"/>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#33FFFFFF"/>
                     <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#22FFFFFF"/>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#FFFFFFFF"/>
