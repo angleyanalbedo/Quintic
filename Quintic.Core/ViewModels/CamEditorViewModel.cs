@@ -98,7 +98,7 @@ namespace Quintic.Wpf.ViewModels
             UndoCommand = new RelayCommand(ExecuteUndo, o => _historyIndex > 0);
             RedoCommand = new RelayCommand(ExecuteRedo, o => _historyIndex < _history.Count - 1);
             
-            ToolbarVM = new ToolbarViewModel(SaveProjectCommand, OpenProjectCommand, ExportCsvCommand, ExportStCommand, UndoCommand, RedoCommand);
+            ToolbarVM = new ToolbarViewModel(SaveProjectCommand, OpenProjectCommand, ExportCsvCommand, ExportStCommand, ShowAnalysisCommand, UndoCommand, RedoCommand);
 
             Recalculate();
         }

@@ -61,6 +61,9 @@
                         <MenuItem Header="To CSV..." Command="{Binding ExportCsvCommand}"/>
                         <MenuItem Header="To Structured Text (ST)..." Command="{Binding ExportStCommand}"/>
                     </MenuItem>
+                    <MenuItem Header="Tools">
+                        <MenuItem Header="Kinematic Analysis..." Command="{Binding ShowAnalysisCommand}"/>
+                    </MenuItem>
                 </Menu>
             </StackPanel>
         </Grid>
