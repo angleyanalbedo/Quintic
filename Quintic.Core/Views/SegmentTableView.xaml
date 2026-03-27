@@ -257,7 +257,9 @@
                             </Style>
                         </DataGridComboBoxColumn.ElementStyle>
                         <DataGridComboBoxColumn.EditingElementStyle>
-                            <Style TargetType="ComboBox" BasedOn="{StaticResource DarkComboBoxStyle}"/>
+                            <Style TargetType="ComboBox" BasedOn="{StaticResource DarkComboBoxStyle}">
+                                <Setter Property="Background" Value="Transparent"/>
+                            </Style>
                         </DataGridComboBoxColumn.EditingElementStyle>
                     </DataGridComboBoxColumn>
 
