@@ -52,6 +52,57 @@ namespace Quintic.Wpf.ViewModels
             set { _peakPower = value; OnPropertyChanged(); }
         }
 
+        // Motor Ratings
+        private double _ratedTorque = 2.0;
+        public double RatedTorque
+        {
+            get => _ratedTorque;
+            set { _ratedTorque = value; OnPropertyChanged(); RecalculateKinematics(); }
+        }
+
+        private double _maxTorque = 6.0;
+        public double MaxTorque
+        {
+            get => _maxTorque;
+            set { _maxTorque = value; OnPropertyChanged(); RecalculateKinematics(); }
+        }
+
+        // KPI & Alerts
+        private double _rmsLoadPercentage;
+        public double RmsLoadPercentage
+        {
+            get => _rmsLoadPercentage;
+            set { _rmsLoadPercentage = value; OnPropertyChanged(); }
+        }
+
+        private double _peakLoadPercentage;
+        public double PeakLoadPercentage
+        {
+            get => _peakLoadPercentage;
+            set { _peakLoadPercentage = value; OnPropertyChanged(); }
+        }
+
+        private string _rmsStatusColor = "Green";
+        public string RmsStatusColor
+        {
+            get => _rmsStatusColor;
+            set { _rmsStatusColor = value; OnPropertyChanged(); }
+        }
+
+        private string _peakStatusColor = "Green";
+        public string PeakStatusColor
+        {
+            get => _peakStatusColor;
+            set { _peakStatusColor = value; OnPropertyChanged(); }
+        }
+
+        private string _diagnosticsLog;
+        public string DiagnosticsLog
+        {
+            get => _diagnosticsLog;
+            set { _diagnosticsLog = value; OnPropertyChanged(); }
+        }
+
         public void Update(CalculationResponse response, ProjectConfig config)
         {
             _lastResponse = response;
@@ -93,6 +144,25 @@ namespace Quintic.Wpf.ViewModels
             PeakTorque = maxT;
             RmsTorque = Math.Sqrt(sumSqT / _lastResponse.Points.Count);
             PeakPower = maxP;
+
+            // KPI Calculations
+            RmsLoadPercentage = (RatedTorque > 0) ? (RmsTorque / RatedTorque) * 100 : 0;
+            PeakLoadPercentage = (MaxTorque > 0) ? (PeakTorque / MaxTorque) * 100 : 0;
+
+            // Status Colors
+            RmsStatusColor = RmsLoadPercentage > 100 ? "Red" : (RmsLoadPercentage > 80 ? "Orange" : "Green");
+            PeakStatusColor = PeakLoadPercentage > 100 ? "Red" : (PeakLoadPercentage > 90 ? "Orange" : "Green");
+
+            // Diagnostics Log
+            var logBuilder = new System.Text.StringBuilder();
+            if (RmsLoadPercentage > 100) logBuilder.AppendLine("⚠️ Motor Overheating Risk (RMS > Rated)");
+            if (PeakLoadPercentage > 100) logBuilder.AppendLine("⛔ Drive Current Limit Exceeded (Peak > Max)");
+            else if (PeakLoadPercentage > 90) logBuilder.AppendLine("⚠️ Near Torque Limit");
+            
+            if (PeakJerk > 1000) logBuilder.AppendLine("⚠️ High Jerk Detected (Check Mechanics)");
+
+            DiagnosticsLog = logBuilder.ToString();
+            if (string.IsNullOrEmpty(DiagnosticsLog)) DiagnosticsLog = "System Healthy";
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
