@@ -83,15 +83,13 @@ This document outlines the architectural evolution of the Quintic Cam Editor, fr
 - **Solution:** Implement **B-Splines (Cubic/Quintic)** for smooth curve fitting through point clouds.
 - **Status:** Completed (`BSpline`).
 
-### 5.3 Kinematic Analysis Dashboard
+### 5.3 Kinematic Analysis Dashboard (In Progress)
 **Goal:** Quantified "Crash Prevention" report, benchmarking Siemens SIZER or Beckhoff TC3 Motion Designer.
 
-#### Phase 1: Physics Engine & Core Math
-- **Multi-Inertia Modeling:** Calculate equivalent inertia $J_{total} = J_{motor} + J_{load}/i^2$.
-- **Friction Models:** Implement Coulomb + Viscous friction ($T_{friction} = T_c \cdot \text{sgn}(\omega) + b \cdot \omega$).
-- **Key Metrics:**
-    - **RMS Acceleration:** $\sqrt{\frac{1}{T} \int a(t)^2 dt}$ for motor thermal load evaluation.
-    - **Power Prediction:** Real-time $P(t) = T(t) \cdot \omega(t)$ to prevent drive overcurrent.
+#### Phase 1: Physics Engine & Core Math (Partially Completed)
+- **Multi-Inertia Modeling:** ✅ Basic inertia summation ($J_{total}$) implemented.
+- **Friction Models:** ✅ Coulomb friction ($T_c$) support added.
+- **Key Metrics:** ✅ RMS Acceleration, Peak Jerk, Peak Torque, and Power Prediction implemented in `KinematicAnalysisViewModel`.
 
 #### Phase 2: Visual KPI Cards & Real-time Alerts
 - **Health View:**
