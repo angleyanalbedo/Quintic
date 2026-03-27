@@ -3,6 +3,10 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Linq;
 using Quintic.Wpf.Core.Models;
+using OxyPlot;
+using OxyPlot.Series;
+using OxyPlot.Axes;
+using OxyPlot.Annotations;
 
 namespace Quintic.Wpf.ViewModels
 {
@@ -50,6 +54,13 @@ namespace Quintic.Wpf.ViewModels
         {
             get => _peakPower;
             set { _peakPower = value; OnPropertyChanged(); }
+        }
+
+        private PlotModel _torqueSpeedModel;
+        public PlotModel TorqueSpeedModel
+        {
+            get => _torqueSpeedModel;
+            set { _torqueSpeedModel = value; OnPropertyChanged(); }
         }
 
         // Motor Ratings
@@ -145,6 +156,8 @@ namespace Quintic.Wpf.ViewModels
             RmsTorque = Math.Sqrt(sumSqT / _lastResponse.Points.Count);
             PeakPower = maxP;
 
+            UpdateTorqueSpeedPlot();
+
             // KPI Calculations
             RmsLoadPercentage = (RatedTorque > 0) ? (RmsTorque / RatedTorque) * 100 : 0;
             PeakLoadPercentage = (MaxTorque > 0) ? (PeakTorque / MaxTorque) * 100 : 0;
@@ -163,6 +176,65 @@ namespace Quintic.Wpf.ViewModels
 
             DiagnosticsLog = logBuilder.ToString();
             if (string.IsNullOrEmpty(DiagnosticsLog)) DiagnosticsLog = "System Healthy";
+        }
+
+        private void UpdateTorqueSpeedPlot()
+        {
+            var model = new PlotModel { Title = "Torque vs Speed (T-N Curve)" };
+            
+            model.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Title = "Velocity", Unit = "units/s" });
+            model.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "Torque", Unit = "Nm" });
+
+            // S1 Limit (Continuous)
+            if (RatedTorque > 0)
+            {
+                var s1Area = new RectangleAnnotation
+                {
+                    MinimumY = -RatedTorque, MaximumY = RatedTorque,
+                    Fill = OxyColor.FromAColor(30, OxyColors.Green),
+                    Text = "S1 (Continuous)"
+                };
+                model.Annotations.Add(s1Area);
+            }
+
+            // S3 Limit (Intermittent)
+            if (MaxTorque > RatedTorque)
+            {
+                var s3AreaTop = new RectangleAnnotation
+                {
+                    MinimumY = RatedTorque, MaximumY = MaxTorque,
+                    Fill = OxyColor.FromAColor(30, OxyColors.Orange),
+                    Text = "S3"
+                };
+                model.Annotations.Add(s3AreaTop);
+
+                var s3AreaBottom = new RectangleAnnotation
+                {
+                    MinimumY = -MaxTorque, MaximumY = -RatedTorque,
+                    Fill = OxyColor.FromAColor(30, OxyColors.Orange)
+                };
+                model.Annotations.Add(s3AreaBottom);
+            }
+
+            var scatterSeries = new ScatterSeries 
+            { 
+                MarkerType = MarkerType.Circle, 
+                MarkerSize = 2, 
+                MarkerFill = OxyColors.Blue,
+                Title = "Operation Points"
+            };
+
+            double jTotal = _config.LoadInertia + _config.MotorInertia;
+
+            foreach (var p in _lastResponse.Points)
+            {
+                // Use signed torque for 4-quadrant plot
+                double torque = (jTotal * p.A) + (_config.FrictionTorque * Math.Sign(p.V));
+                scatterSeries.Points.Add(new ScatterPoint(p.V, torque));
+            }
+
+            model.Series.Add(scatterSeries);
+            TorqueSpeedModel = model;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

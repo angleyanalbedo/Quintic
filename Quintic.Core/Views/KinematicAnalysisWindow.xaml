@@ -1,7 +1,8 @@
 <Window x:Class="Quintic.Wpf.Views.KinematicAnalysisWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Kinematic Analysis" SizeToContent="Height" Width="300"
+        xmlns:oxy="http://oxyplot.org/wpf"
+        Title="Kinematic Analysis" SizeToContent="Height" Width="900"
         WindowStyle="ToolWindow" Topmost="True" ResizeMode="CanResize"
         Background="{StaticResource Brush.Control.Background}"
         Foreground="{StaticResource Brush.Text.Primary}">
@@ -18,7 +19,12 @@
         </Style>
     </Window.Resources>
     <Grid Margin="10">
-        <StackPanel>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0">
             <GroupBox Header="Physical Parameters">
                 <StackPanel Margin="5">
                     <TextBlock Text="Load Inertia (kg·m²):" Margin="0,5,0,0"/>
@@ -116,5 +122,9 @@
             <TextBlock Text="* Updates in real-time as you drag points." 
                        FontStyle="Italic" Foreground="Gray" TextWrapping="Wrap" Margin="0,10,0,0"/>
         </StackPanel>
+
+        <GroupBox Grid.Column="1" Header="T-N Characteristic" Margin="10,0,0,0">
+            <oxy:PlotView Model="{Binding TorqueSpeedModel}" Height="400"/>
+        </GroupBox>
     </Grid>
 </Window>
