@@ -29,14 +29,50 @@
             <!-- Area A: Left Sidebar (Data Grid + Limits) -->
             <Grid Grid.Column="0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="2*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="1*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <views:SegmentTableView Grid.Row="0" DataContext="{Binding SegmentTableVM}"/>
 
+                <!-- Splitter -->
+                <GridSplitter Grid.Row="1" Height="6" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="Transparent" ShowsPreview="True"/>
+
+                <!-- Logic Tracks Management -->
+                <Border Grid.Row="2" Background="{StaticResource Brush.Control.Background}" Margin="0,0,0,5" Padding="5" CornerRadius="2">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        
+                        <DockPanel Grid.Row="0" Margin="0,0,0,5">
+                            <TextBlock Text="LOGIC TRACKS" FontSize="12" FontWeight="Bold" Foreground="{StaticResource Brush.Text.Secondary}" VerticalAlignment="Center"/>
+                            <Button Content="+" Command="{Binding LogicTracksVM.AddTrackCommand}" Width="24" Height="24" HorizontalAlignment="Right" Background="Transparent" Foreground="{StaticResource Brush.Accent}" BorderThickness="0" FontWeight="Bold" FontSize="16"/>
+                        </DockPanel>
+
+                        <DataGrid Grid.Row="1" ItemsSource="{Binding LogicTracksVM.Tracks}" AutoGenerateColumns="False" CanUserAddRows="False" 
+                                  Background="Transparent" RowBackground="Transparent" BorderThickness="0" HeadersVisibility="Column">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ID" Binding="{Binding ChannelIndex}" Width="40" IsReadOnly="True" Foreground="Gray"/>
+                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" Foreground="White"/>
+                                <DataGridTemplateColumn Width="30">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="×" Command="{Binding DataContext.LogicTracksVM.RemoveTrackCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                    CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" Foreground="#E74C3C"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Border>
+
                 <!-- Physical Limits Configuration -->
-                <Border Grid.Row="1" Background="{StaticResource Brush.Control.Background}" Margin="0,5,0,0" Padding="10" CornerRadius="2">
+                <Border Grid.Row="3" Background="{StaticResource Brush.Control.Background}" Margin="0,0,0,0" Padding="10" CornerRadius="2">
                     <StackPanel>
                         <TextBlock Text="PHYSICAL LIMITS" FontSize="12" FontWeight="Bold" Foreground="{StaticResource Brush.Text.Secondary}" Margin="0,0,0,10"/>
                         
