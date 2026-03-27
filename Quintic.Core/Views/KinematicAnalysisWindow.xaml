@@ -1,0 +1,76 @@
+<Window x:Class="Quintic.Wpf.Views.KinematicAnalysisWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Kinematic Analysis" Height="450" Width="300"
+        WindowStyle="ToolWindow" Topmost="True" ResizeMode="CanResize">
+    <Grid Margin="10">
+        <StackPanel>
+            <GroupBox Header="Physical Parameters">
+                <StackPanel Margin="5">
+                    <TextBlock Text="Load Inertia (kg·m²):" Margin="0,5,0,0"/>
+                    <TextBox Text="{Binding Config.LoadInertia, UpdateSourceTrigger=PropertyChanged}"/>
+                    
+                    <TextBlock Text="Motor Inertia (kg·m²):" Margin="0,5,0,0"/>
+                    <TextBox Text="{Binding Config.MotorInertia, UpdateSourceTrigger=PropertyChanged}"/>
+                    
+                    <TextBlock Text="Friction Torque (Nm):" Margin="0,5,0,0"/>
+                    <TextBox Text="{Binding Config.FrictionTorque, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+            </GroupBox>
+
+            <GroupBox Header="Analysis Results" Margin="0,10,0,0">
+                <StackPanel Margin="5">
+                    <Grid Margin="0,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="RMS Acceleration:"/>
+                        <TextBlock Grid.Column="1" Text="{Binding RmsAcceleration, StringFormat=N2}" FontWeight="Bold"/>
+                    </Grid>
+                    
+                    <Grid Margin="0,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Peak Jerk:"/>
+                        <TextBlock Grid.Column="1" Text="{Binding PeakJerk, StringFormat=N2}" FontWeight="Bold"/>
+                    </Grid>
+
+                    <Separator Margin="0,5"/>
+
+                    <Grid Margin="0,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Peak Torque (Nm):"/>
+                        <TextBlock Grid.Column="1" Text="{Binding PeakTorque, StringFormat=N2}" FontWeight="Bold" Foreground="Red"/>
+                    </Grid>
+
+                    <Grid Margin="0,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="RMS Torque (Nm):"/>
+                        <TextBlock Grid.Column="1" Text="{Binding RmsTorque, StringFormat=N2}" FontWeight="Bold"/>
+                    </Grid>
+                    
+                     <Grid Margin="0,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Peak Power (W):"/>
+                        <TextBlock Grid.Column="1" Text="{Binding PeakPower, StringFormat=N2}" FontWeight="Bold"/>
+                    </Grid>
+                </StackPanel>
+            </GroupBox>
+            
+            <TextBlock Text="* Updates in real-time as you drag points." 
+                       FontStyle="Italic" Foreground="Gray" TextWrapping="Wrap" Margin="0,10,0,0"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -43,6 +43,11 @@ namespace Quintic.Wpf.Core.Models
         public ExecutionMode ExecutionMode { get; set; } = ExecutionMode.OneShot;
         public string UnitsMaster { get; set; } = "deg";
         public string UnitsSlave { get; set; } = "mm";
+
+        // Kinematic Analysis Parameters
+        public double LoadInertia { get; set; } = 0.01; // kg*m^2
+        public double MotorInertia { get; set; } = 0.005; // kg*m^2
+        public double FrictionTorque { get; set; } = 0.1; // Nm
     }
 
     public class CamPoint

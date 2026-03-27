@@ -30,6 +30,7 @@ namespace Quintic.Wpf.ViewModels
         public SegmentTableViewModel SegmentTableVM { get; set; }
         public LogicTracksViewModel LogicTracksVM { get; set; }
         public CamPlotViewModel CamPlotVM { get; set; }
+        public KinematicAnalysisViewModel AnalysisVM { get; set; }
         
         public ProjectConfig Config { get; set; }
         
@@ -59,8 +60,11 @@ namespace Quintic.Wpf.ViewModels
         public ICommand OpenProjectCommand { get; private set; }
         public ICommand ExportCsvCommand { get; private set; }
         public ICommand ExportStCommand { get; private set; }
+        public ICommand ShowAnalysisCommand { get; private set; }
         public ICommand UndoCommand { get; private set; }
         public ICommand RedoCommand { get; private set; }
+
+        public Action RequestOpenAnalysisWindow { get; set; }
 
         private CalculationResponse _lastCalculation;
 
@@ -71,6 +75,7 @@ namespace Quintic.Wpf.ViewModels
             SegmentTableVM = new SegmentTableViewModel();
             LogicTracksVM = new LogicTracksViewModel();
             CamPlotVM = new CamPlotViewModel();
+            AnalysisVM = new KinematicAnalysisViewModel();
 
             // Subscribe to changes in TableVM to trigger Recalculate
             SegmentTableVM.SegmentsChanged += (s, e) => Recalculate();
@@ -89,6 +94,7 @@ namespace Quintic.Wpf.ViewModels
             OpenProjectCommand = new RelayCommand(ExecuteOpenProject);
             ExportCsvCommand = new RelayCommand(ExecuteExportCsv);
             ExportStCommand = new RelayCommand(ExecuteExportSt);
+            ShowAnalysisCommand = new RelayCommand(o => RequestOpenAnalysisWindow?.Invoke());
             UndoCommand = new RelayCommand(ExecuteUndo, o => _historyIndex > 0);
             RedoCommand = new RelayCommand(ExecuteRedo, o => _historyIndex < _history.Count - 1);
             
@@ -429,6 +435,9 @@ namespace Quintic.Wpf.ViewModels
                 CamPlotVM.UpdatePlots(_lastCalculation, SegmentTableVM.Segments);
                 CamPlotVM.UpdateLimits(LimitVelocity, LimitAcceleration);
                 CamPlotVM.HighlightViolations(_lastCalculation, LimitVelocity, LimitAcceleration);
+
+                // 5. Update Analysis
+                AnalysisVM.Update(_lastCalculation, Config);
             }
             finally
             {
