@@ -21,6 +21,9 @@ namespace Quintic.Wpf.Core.Services
         private bool _isSyncingAxes = false;
         private int _dragIndex = -1;
 
+        private LineAnnotation _sCursor;
+        private LineAnnotation _vaCursor;
+
         public PlotService()
         {
             InitializePlots();
@@ -29,6 +32,10 @@ namespace Quintic.Wpf.Core.Services
             SPlotModel.MouseDown += OnSPlotMouseDown;
             SPlotModel.MouseMove += OnSPlotMouseMove;
             SPlotModel.MouseUp += OnSPlotMouseUp;
+
+            VAPlotModel.MouseMove += OnVAPlotMouseMove;
+            
+            // Also listen to mouse leave to hide cursor? Or just let it stay. Let's let it stay.
         }
 
         private void OnSPlotMouseDown(object sender, OxyMouseDownEventArgs e)
@@ -87,6 +94,53 @@ namespace Quintic.Wpf.Core.Services
                     e.Handled = true;
                 }
             }
+            else
+            {
+                var xAxis = SPlotModel.Axes.FirstOrDefault(a => a.Position == AxisPosition.Bottom);
+                if (xAxis != null)
+                {
+                    double x = xAxis.InverseTransform(e.Position.X);
+                    UpdateCursors(x);
+                }
+            }
+        }
+
+        private void OnVAPlotMouseMove(object sender, OxyMouseEventArgs e)
+        {
+            var xAxis = VAPlotModel.Axes.FirstOrDefault(a => a.Position == AxisPosition.Bottom);
+            if (xAxis != null)
+            {
+                double x = xAxis.InverseTransform(e.Position.X);
+                UpdateCursors(x);
+            }
+        }
+
+        private void UpdateCursors(double x)
+        {
+            if (_sCursor == null || _vaCursor == null) return;
+
+            _sCursor.X = x;
+            _vaCursor.X = x;
+
+            if (_lastResponse != null && _lastResponse.Points.Count > 0)
+            {
+                // Find nearest point
+                var point = _lastResponse.Points.OrderBy(p => System.Math.Abs(p.Theta - x)).FirstOrDefault();
+                if (point != null)
+                {
+                    double jTotal = _lastConfig != null ? _lastConfig.LoadInertia + _lastConfig.MotorInertia : 0.015;
+                    double friction = _lastConfig != null ? _lastConfig.FrictionTorque : 0.1;
+                    
+                    double torque = (jTotal * point.A) + (friction * System.Math.Sign(point.V));
+                    double power = torque * point.V;
+
+                    _sCursor.Text = $"Θ: {point.Theta:F1}°\nS: {point.S:F2}\nT: {torque:F2} Nm\nP: {power:F2} W";
+                    _vaCursor.Text = $"Θ: {point.Theta:F1}°\nV: {point.V:F2}\nA: {point.A:F2}\nT: {torque:F2} Nm\nP: {power:F2} W";
+                }
+            }
+
+            SPlotModel.InvalidatePlot(false);
+            VAPlotModel.InvalidatePlot(false);
         }
 
         private void OnSPlotMouseUp(object sender, OxyMouseEventArgs e)
@@ -106,15 +160,26 @@ namespace Quintic.Wpf.Core.Services
             VAPlotModel.InvalidatePlot(true);
         }
 
-        public void SetSeriesVisibility(string seriesKey, bool isVisible)
+        public void SetSeriesVisibilityByTitle(string title, bool isVisible)
         {
-            foreach (var series in VAPlotModel.Series)
+            var series = VAPlotModel.Series.FirstOrDefault(s => s.Title == title);
+            if (series != null)
             {
-                if (series is LineSeries lineSeries && lineSeries.YAxisKey == seriesKey)
+                series.IsVisible = isVisible;
+            }
+
+            // Also manage axis visibility. If all series on an axis are hidden, hide the axis.
+            if (series is XYAxisSeries xySeries)
+            {
+                var axis = VAPlotModel.Axes.FirstOrDefault(a => a.Key == xySeries.YAxisKey);
+                if (axis != null)
                 {
-                    lineSeries.IsVisible = isVisible;
+                    bool anyVisible = VAPlotModel.Series.OfType<XYAxisSeries>()
+                        .Any(s => s.YAxisKey == axis.Key && s.IsVisible);
+                    axis.IsAxisVisible = anyVisible;
                 }
             }
+
             VAPlotModel.InvalidatePlot(true);
         }
 
@@ -189,8 +254,14 @@ namespace Quintic.Wpf.Core.Services
             VAPlotModel.InvalidatePlot(true);
         }
 
-        public void UpdatePlots(CalculationResponse response, IEnumerable<Segment> segments = null)
+        private CalculationResponse _lastResponse;
+        private ProjectConfig _lastConfig;
+
+        public void UpdatePlots(CalculationResponse response, ProjectConfig config, IEnumerable<Segment> segments = null)
         {
+            _lastResponse = response;
+            _lastConfig = config;
+
             if (SPlotModel == null || VAPlotModel == null) return;
 
             // Update Control Points (Interactive Design Prep)
@@ -232,20 +303,42 @@ namespace Quintic.Wpf.Core.Services
                 }
             }
 
-            // Update V, A, J Series
-            var vSeries = VAPlotModel.Series[0] as LineSeries;
-            var aSeries = VAPlotModel.Series[1] as LineSeries;
-            var jSeries = VAPlotModel.Series[2] as LineSeries;
+            // Update V, A, J, T, P, Regen Series
+            var vSeries = VAPlotModel.Series.FirstOrDefault(s => s.Title == "Velocity") as LineSeries;
+            var aSeries = VAPlotModel.Series.FirstOrDefault(s => s.Title == "Acceleration") as LineSeries;
+            var jSeries = VAPlotModel.Series.FirstOrDefault(s => s.Title == "Jerk") as LineSeries;
+            var tSeries = VAPlotModel.Series.FirstOrDefault(s => s.Title == "Torque") as LineSeries;
+            var pSeries = VAPlotModel.Series.FirstOrDefault(s => s.Title == "Power") as LineSeries;
+            var rSeries = VAPlotModel.Series.FirstOrDefault(s => s.Title == "Regen Energy") as AreaSeries;
 
             if (vSeries != null) vSeries.Points.Clear();
             if (aSeries != null) aSeries.Points.Clear();
             if (jSeries != null) jSeries.Points.Clear();
+            if (tSeries != null) tSeries.Points.Clear();
+            if (pSeries != null) pSeries.Points.Clear();
+            if (rSeries != null) { rSeries.Points.Clear(); rSeries.Points2.Clear(); }
+
+            double jTotal = config != null ? config.LoadInertia + config.MotorInertia : 0.015;
+            double friction = config != null ? config.FrictionTorque : 0.1;
 
             foreach (var p in response.Points)
             {
                 if (vSeries != null) vSeries.Points.Add(new DataPoint(p.Theta, p.V));
                 if (aSeries != null) aSeries.Points.Add(new DataPoint(p.Theta, p.A));
                 if (jSeries != null) jSeries.Points.Add(new DataPoint(p.Theta, p.J));
+
+                double torque = (jTotal * p.A) + (friction * System.Math.Sign(p.V));
+                double power = torque * p.V;
+
+                if (tSeries != null) tSeries.Points.Add(new DataPoint(p.Theta, torque));
+                if (pSeries != null) pSeries.Points.Add(new DataPoint(p.Theta, power));
+                
+                if (rSeries != null)
+                {
+                    double regenPower = power < 0 ? power : 0;
+                    rSeries.Points.Add(new DataPoint(p.Theta, regenPower));
+                    rSeries.Points2.Add(new DataPoint(p.Theta, 0));
+                }
             }
 
             SPlotModel.InvalidatePlot(true);
@@ -298,6 +391,16 @@ namespace Quintic.Wpf.Core.Services
                 StrokeThickness = 3,
                 MarkerType = MarkerType.None // Performance optimization for high resolution
             });
+
+            _sCursor = new LineAnnotation
+            {
+                Type = LineAnnotationType.Vertical,
+                Color = OxyColors.Gray,
+                LineStyle = LineStyle.Dash,
+                StrokeThickness = 1,
+                TextColor = textColor
+            };
+            SPlotModel.Annotations.Add(_sCursor);
 
             // --- V/A/J Plot ---
             VAPlotModel = new PlotModel
@@ -374,9 +477,57 @@ namespace Quintic.Wpf.Core.Services
                 TextColor = OxyColor.Parse("#9B59B6")
             });
 
+            VAPlotModel.Axes.Add(new LinearAxis
+            {
+                Position = AxisPosition.Right,
+                Key = "T",
+                Title = "Torque",
+                PositionTier = 2,
+                MajorGridlineStyle = LineStyle.None,
+                TickStyle = TickStyle.None,
+                AxislineStyle = LineStyle.None,
+                TextColor = OxyColor.Parse("#E74C3C") // Red-ish
+            });
+
+            VAPlotModel.Axes.Add(new LinearAxis
+            {
+                Position = AxisPosition.Right,
+                Key = "P",
+                Title = "Power",
+                PositionTier = 3,
+                MajorGridlineStyle = LineStyle.None,
+                TickStyle = TickStyle.None,
+                AxislineStyle = LineStyle.None,
+                TextColor = OxyColor.Parse("#F1C40F") // Yellow
+            });
+
             VAPlotModel.Series.Add(new LineSeries { Title = "Velocity", Color = OxyColor.Parse("#2ECC71"), StrokeThickness = 2, YAxisKey = "V" });
             VAPlotModel.Series.Add(new LineSeries { Title = "Acceleration", Color = OxyColor.Parse("#E67E22"), StrokeThickness = 2, YAxisKey = "A" });
             VAPlotModel.Series.Add(new LineSeries { Title = "Jerk", Color = OxyColor.Parse("#9B59B6"), StrokeThickness = 1.5, YAxisKey = "J", LineStyle = LineStyle.Dash });
+            
+            VAPlotModel.Series.Add(new LineSeries { Title = "Torque", Color = OxyColor.Parse("#E74C3C"), StrokeThickness = 2, YAxisKey = "T", IsVisible = false });
+            VAPlotModel.Series.Add(new LineSeries { Title = "Power", Color = OxyColor.Parse("#F1C40F"), StrokeThickness = 2, YAxisKey = "P", IsVisible = false });
+            
+            VAPlotModel.Series.Add(new AreaSeries 
+            { 
+                Title = "Regen Energy", 
+                Color = OxyColor.Parse("#8E44AD"), 
+                Fill = OxyColor.FromAColor(100, OxyColors.Purple), 
+                StrokeThickness = 0, 
+                YAxisKey = "P", 
+                IsVisible = false 
+            });
+
+            _vaCursor = new LineAnnotation
+            {
+                Type = LineAnnotationType.Vertical,
+                Color = OxyColors.Gray,
+                LineStyle = LineStyle.Dash,
+                StrokeThickness = 1,
+                TextColor = textColor,
+                TextHorizontalAlignment = HorizontalAlignment.Left
+            };
+            VAPlotModel.Annotations.Add(_vaCursor);
         }
     }
 }

@@ -432,7 +432,7 @@ namespace Quintic.Wpf.ViewModels
                 }
 
                 // 4. Update Plots
-                CamPlotVM.UpdatePlots(_lastCalculation, SegmentTableVM.Segments);
+                CamPlotVM.UpdatePlots(_lastCalculation, Config, SegmentTableVM.Segments);
                 CamPlotVM.UpdateLimits(LimitVelocity, LimitAcceleration);
                 CamPlotVM.HighlightViolations(_lastCalculation, LimitVelocity, LimitAcceleration);
 

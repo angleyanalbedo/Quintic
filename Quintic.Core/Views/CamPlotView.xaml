@@ -132,23 +132,39 @@
                             <MenuItem Header="Velocity" IsCheckable="True" IsChecked="{Binding IsVelocityVisible}"/>
                             <MenuItem Header="Acceleration" IsCheckable="True" IsChecked="{Binding IsAccelerationVisible}"/>
                             <MenuItem Header="Jerk" IsCheckable="True" IsChecked="{Binding IsJerkVisible}"/>
+                            <Separator/>
+                            <MenuItem Header="Torque" IsCheckable="True" IsChecked="{Binding IsTorqueVisible}"/>
+                            <MenuItem Header="Power" IsCheckable="True" IsChecked="{Binding IsPowerVisible}"/>
+                            <MenuItem Header="Regen Energy" IsCheckable="True" IsChecked="{Binding IsRegenVisible}"/>
                         </ContextMenu>
                     </oxy:PlotView.ContextMenu>
                 </oxy:PlotView>
                 
                 <!-- HUD Overlay -->
                 <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Margin="20" Background="#80111111">
-                     <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                     <StackPanel Orientation="Horizontal" Margin="0,0,0,5" Visibility="{Binding IsVelocityVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Border Width="10" Height="10" Background="{StaticResource Brush.Success}" CornerRadius="5" Margin="0,0,8,0" VerticalAlignment="Center"/>
                         <TextBlock Text="Velocity (V)" Foreground="{StaticResource Brush.Success}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5" Visibility="{Binding IsAccelerationVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Border Width="10" Height="10" Background="{StaticResource Brush.Warning}" CornerRadius="5" Margin="0,0,8,0" VerticalAlignment="Center"/>
                         <TextBlock Text="Acceleration (A)" Foreground="{StaticResource Brush.Warning}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5" Visibility="{Binding IsJerkVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Border Width="10" Height="10" Background="#9B59B6" CornerRadius="5" Margin="0,0,8,0" VerticalAlignment="Center"/>
                         <TextBlock Text="Jerk (J)" Foreground="#9B59B6" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5" Visibility="{Binding IsTorqueVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Border Width="10" Height="10" Background="#E74C3C" CornerRadius="5" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Torque (T)" Foreground="#E74C3C" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5" Visibility="{Binding IsPowerVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Border Width="10" Height="10" Background="#F1C40F" CornerRadius="5" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Power (P)" Foreground="#F1C40F" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Visibility="{Binding IsRegenVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Border Width="10" Height="10" Background="#8E44AD" CornerRadius="5" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Regen" Foreground="#8E44AD" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     </StackPanel>
                 </StackPanel>
             </Grid>

@@ -27,6 +27,16 @@ namespace Quintic.Wpf.ViewModels
 
         public ICommand ResetViewCommand { get; private set; }
 
+        private void UpdatePlotVisibility()
+        {
+            _plotService.SetSeriesVisibilityByTitle("Velocity", IsVelocityVisible);
+            _plotService.SetSeriesVisibilityByTitle("Acceleration", IsAccelerationVisible);
+            _plotService.SetSeriesVisibilityByTitle("Jerk", IsJerkVisible);
+            _plotService.SetSeriesVisibilityByTitle("Torque", IsTorqueVisible);
+            _plotService.SetSeriesVisibilityByTitle("Power", IsPowerVisible);
+            _plotService.SetSeriesVisibilityByTitle("Regen Energy", IsRegenVisible);
+        }
+
         private bool _isVelocityVisible = true;
         public bool IsVelocityVisible
         {
@@ -36,8 +46,8 @@ namespace Quintic.Wpf.ViewModels
                 if (_isVelocityVisible != value)
                 {
                     _isVelocityVisible = value;
+                    UpdatePlotVisibility();
                     OnPropertyChanged();
-                    _plotService.SetSeriesVisibility("V", value);
                 }
             }
         }
@@ -51,8 +61,8 @@ namespace Quintic.Wpf.ViewModels
                 if (_isAccelerationVisible != value)
                 {
                     _isAccelerationVisible = value;
+                    UpdatePlotVisibility();
                     OnPropertyChanged();
-                    _plotService.SetSeriesVisibility("A", value);
                 }
             }
         }
@@ -66,8 +76,53 @@ namespace Quintic.Wpf.ViewModels
                 if (_isJerkVisible != value)
                 {
                     _isJerkVisible = value;
+                    UpdatePlotVisibility();
                     OnPropertyChanged();
-                    _plotService.SetSeriesVisibility("J", value);
+                }
+            }
+        }
+
+        private bool _isTorqueVisible = false;
+        public bool IsTorqueVisible
+        {
+            get => _isTorqueVisible;
+            set
+            {
+                if (_isTorqueVisible != value)
+                {
+                    _isTorqueVisible = value;
+                    UpdatePlotVisibility();
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private bool _isPowerVisible = false;
+        public bool IsPowerVisible
+        {
+            get => _isPowerVisible;
+            set
+            {
+                if (_isPowerVisible != value)
+                {
+                    _isPowerVisible = value;
+                    UpdatePlotVisibility();
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private bool _isRegenVisible = false;
+        public bool IsRegenVisible
+        {
+            get => _isRegenVisible;
+            set
+            {
+                if (_isRegenVisible != value)
+                {
+                    _isRegenVisible = value;
+                    UpdatePlotVisibility();
+                    OnPropertyChanged();
                 }
             }
         }
@@ -136,9 +191,9 @@ namespace Quintic.Wpf.ViewModels
             }
         }
 
-        public void UpdatePlots(CalculationResponse response, IEnumerable<Segment> segments = null)
+        public void UpdatePlots(CalculationResponse response, ProjectConfig config, IEnumerable<Segment> segments = null)
         {
-            _plotService.UpdatePlots(response, segments);
+            _plotService.UpdatePlots(response, config, segments);
         }
 
         public void UpdateLogicTracks(IEnumerable<CamTrack> tracks)
