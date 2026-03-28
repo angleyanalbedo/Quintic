@@ -429,6 +429,13 @@ namespace Quintic.Wpf.Core.Services
                 if (_isSyncingAxes) return;
                 _isSyncingAxes = true;
                 vaXAxis.Zoom(sXAxis.ActualMinimum, sXAxis.ActualMaximum);
+                
+                // Auto-adjust Y axes on VAPlot when X is zoomed
+                foreach (var axis in VAPlotModel.Axes.Where(a => a.Position != AxisPosition.Bottom))
+                {
+                    axis.Reset();
+                }
+
                 VAPlotModel.InvalidatePlot(false);
                 _isSyncingAxes = false;
             };
@@ -438,7 +445,24 @@ namespace Quintic.Wpf.Core.Services
                 if (_isSyncingAxes) return;
                 _isSyncingAxes = true;
                 sXAxis.Zoom(vaXAxis.ActualMinimum, vaXAxis.ActualMaximum);
+                
+                // Auto-adjust Y axes on SPlot when X is zoomed
+                foreach (var axis in SPlotModel.Axes.Where(a => a.Position != AxisPosition.Bottom))
+                {
+                    axis.Reset();
+                }
+                
+                // Auto-adjust Y axes on VAPlot itself during horizontal pan/zoom
+                if (e.ChangeType == AxisChangeTypes.Zoom || e.ChangeType == AxisChangeTypes.Pan)
+                {
+                    foreach (var axis in VAPlotModel.Axes.Where(a => a.Position != AxisPosition.Bottom))
+                    {
+                        axis.Reset();
+                    }
+                }
+
                 SPlotModel.InvalidatePlot(false);
+                VAPlotModel.InvalidatePlot(false);
                 _isSyncingAxes = false;
             };
 
