@@ -23,6 +23,7 @@ This project is built for automation engineers who demand extreme performance an
 *   **CSV Export**: One-click export of high-precision point tables, supporting direct import into mainstream motion controllers like Siemens, Beckhoff, and Omron.
 *   **ST Code Generation**: Generate IEC 61131-3 compliant Structured Text (ST) arrays for direct PLC integration.
 *   **Discrete Logic Tracks**: Define multi-channel IO switch points synchronized with motion, supporting hysteresis compensation.
+*   **PDF Reporting**: One-click generation of professional Kinematic Analysis & Crash Prevention reports.
 *   **Host Integration API**: Available as a NuGet package (`Quintic.Core`) for embedding the editor into custom HMI or Industrial IDEs.
 *   **Professional Visuals**: Comes with a modern dark theme (charcoal background + electric blue/orange highlights) to reduce visual fatigue for engineers working long hours.
 
@@ -59,11 +60,11 @@ Add the namespace and control to your XAML:
 
 ## Basic Usage
 
-*   **Segment Table**: Use the left-side data grid to configure motion laws (Poly5, Cycloidal, etc.) and target coordinates manually.
+*   **Segment Table**: Use the `MOTION PROFILE` tab's data grid to configure motion laws (Poly5, Cycloidal, etc.) and target coordinates manually.
 *   **Interactive Canvas**:
     *   **Add Point**: Hold **`Ctrl + Left Click`** anywhere on the curve to split the segment and insert a new control point.
     *   **Edit Point**: Drag existing control points to adjust the profile in real-time.
-*   **Logic Tracks**: Manage digital output tracks in the bottom panel. Add tracks and define switch intervals synchronized with the master position.
+*   **Logic Tracks**: Use the `LOGIC TRACKS` tab to manage digital output channels. Add tracks and define precise switch degree intervals synchronized with the master position.
 
 ## Developer Setup (Source Code)
 

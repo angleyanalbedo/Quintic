@@ -9,6 +9,7 @@
     <!-- NuGet Package Metadata -->
     <Authors>Quintic</Authors>
     <Company>Quintic</Company>
+    <Version>0.8.0</Version>
     <Product>Quintic Cam Profile Generator</Product>
     <Description>A universal industrial electronic cam profile design platform compliant with the VDI 2143 standard. Features high-performance plotting, real-time compilation, and CSV export for motion controllers.</Description>
     <PackageTags>industrial;motion-control;cam;vdi2143;automation;wpf;oxyplot;plc;siemens;beckhoff;codesys</PackageTags>
@@ -22,6 +23,18 @@
     <RepositoryUrl>https://github.com/angleyanalbedo/Quintic</RepositoryUrl>
     <PackageProjectUrl>https://github.com/angleyanalbedo/Quintic</PackageProjectUrl>
     <PackageReleaseNotes># Release Notes
+
+## v0.8.0 - UI Modernization &amp; Reporting
+**Date:** 2026-03-28
+
+### 🚀 New Features
+- **Automated PDF Reports**: Integrated `QuestPDF` to generate professional, one-click "Kinematic Analysis &amp; Crash Prevention" reports containing all physical parameters, KPI alerts, and vector-rendered waveform charts.
+- **Enhanced Export Data**: CSV and Structured Text (ST) code generation now automatically interleaves boolean Logic Track (IO switch) states aligned with the master position.
+- **Responsive Axis Scaling**: Modifying curves or zooming into the X-axis (Angle) now continuously triggers adaptive Y-axis scaling for Velocity, Acceleration, and Jerk bounds.
+
+### 🎨 UI/UX Improvements
+- **Tabbed Workspace**: Completely refactored the Left Sidebar into a `TabControl` ("Motion Profile" vs "Logic Tracks"), vastly increasing vertical real estate for segment design.
+- **Inline Switch Editor**: Overhauled the Logic Tracks interface, adding inline, multi-interval switch degree editors with clear `OnAngle` / `OffAngle` configuration.
 
 ## v0.7.0 - Kinematic Analysis &amp; Visualization
 **Date:** 2026-03-28
