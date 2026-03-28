@@ -267,7 +267,7 @@ namespace Quintic.Wpf.ViewModels
 
             if (saveFileDialog.ShowDialog() == true)
             {
-                CsvExporter.Export(saveFileDialog.FileName, _lastCalculation);
+                CsvExporter.Export(saveFileDialog.FileName, _lastCalculation, LogicTracksVM.Tracks);
             }
         }
 
@@ -284,7 +284,7 @@ namespace Quintic.Wpf.ViewModels
 
             if (saveFileDialog.ShowDialog() == true)
             {
-                StCodeGenerator.Export(saveFileDialog.FileName, _lastCalculation);
+                StCodeGenerator.Export(saveFileDialog.FileName, _lastCalculation, LogicTracksVM.Tracks);
             }
         }
 
