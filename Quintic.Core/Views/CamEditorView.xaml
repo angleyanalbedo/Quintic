@@ -110,6 +110,30 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style TargetType="Button" x:Key="IconButtonStyle">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" BorderThickness="0" CornerRadius="3">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#33FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#66FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.3"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
     <Grid>
@@ -190,7 +214,7 @@
                                 
                                 <DockPanel Grid.Row="0" Margin="0,0,0,10">
                                     <TextBlock Text="OUTPUT CHANNELS" FontSize="12" FontWeight="Bold" Foreground="{StaticResource Brush.Text.Secondary}" VerticalAlignment="Center"/>
-                                    <Button Content="+" Command="{Binding LogicTracksVM.AddTrackCommand}" Width="24" Height="24" HorizontalAlignment="Right" Background="Transparent" Foreground="{StaticResource Brush.Accent}" BorderThickness="0" FontWeight="Bold" FontSize="16"/>
+                                    <Button Style="{StaticResource IconButtonStyle}" Content="+" Command="{Binding LogicTracksVM.AddTrackCommand}" Width="24" Height="24" HorizontalAlignment="Right" Foreground="{StaticResource Brush.Accent}" FontWeight="Bold" FontSize="16"/>
                                 </DockPanel>
 
                                 <DataGrid Grid.Row="1" ItemsSource="{Binding LogicTracksVM.Tracks}" SelectedItem="{Binding LogicTracksVM.SelectedTrack}" AutoGenerateColumns="False" CanUserAddRows="False" 
@@ -210,8 +234,8 @@
                                         <DataGridTemplateColumn Width="30">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <Button Content="×" Command="{Binding DataContext.LogicTracksVM.RemoveTrackCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                                                            CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" Foreground="#E74C3C"/>
+                                                    <Button Style="{StaticResource IconButtonStyle}" Content="×" Command="{Binding DataContext.LogicTracksVM.RemoveTrackCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                            CommandParameter="{Binding}" Foreground="#E74C3C" FontSize="14" FontWeight="Bold"/>
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
@@ -236,7 +260,7 @@
                                         <TextBlock Text="SWITCH INTERVALS" FontSize="12" FontWeight="Bold" Foreground="{StaticResource Brush.Text.Secondary}"/>
                                         <TextBlock Text="{Binding LogicTracksVM.SelectedTrack.Name, StringFormat=' - {0}'}" FontSize="12" FontWeight="Bold" Foreground="{StaticResource Brush.Accent}"/>
                                     </StackPanel>
-                                    <Button Content="+" Command="{Binding LogicTracksVM.AddSwitchCommand}" Width="24" Height="24" HorizontalAlignment="Right" Background="Transparent" Foreground="{StaticResource Brush.Accent}" BorderThickness="0" FontWeight="Bold" FontSize="16"/>
+                                    <Button Style="{StaticResource IconButtonStyle}" Content="+" Command="{Binding LogicTracksVM.AddSwitchCommand}" Width="24" Height="24" HorizontalAlignment="Right" Foreground="{StaticResource Brush.Accent}" FontWeight="Bold" FontSize="16"/>
                                 </DockPanel>
 
                                 <DataGrid Grid.Row="1" ItemsSource="{Binding LogicTracksVM.SelectedTrack.Switches}" AutoGenerateColumns="False" CanUserAddRows="False" 
@@ -263,8 +287,8 @@
                                         <DataGridTemplateColumn Width="30">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <Button Content="×" Command="{Binding DataContext.LogicTracksVM.RemoveSwitchCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                                                            CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" Foreground="#E74C3C"/>
+                                                    <Button Style="{StaticResource IconButtonStyle}" Content="×" Command="{Binding DataContext.LogicTracksVM.RemoveSwitchCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                            CommandParameter="{Binding}" Foreground="#E74C3C" FontSize="14" FontWeight="Bold"/>
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
