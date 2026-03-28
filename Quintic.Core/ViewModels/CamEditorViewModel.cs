@@ -81,6 +81,10 @@ namespace Quintic.Wpf.ViewModels
             // Subscribe to changes in TableVM to trigger Recalculate
             SegmentTableVM.SegmentsChanged += (s, e) => Recalculate();
             
+            // Subscribe to changes in LogicTracks to trigger re-rendering
+            LogicTracksVM.Tracks.CollectionChanged += (s, e) => CamPlotVM.UpdateLogicTracks(LogicTracksVM.Tracks);
+            LogicTracksVM.TracksChanged += (s, e) => CamPlotVM.UpdateLogicTracks(LogicTracksVM.Tracks);
+            
             // Handle Dragging
             CamPlotVM.PointDragged += OnCamPointDragged;
             CamPlotVM.CanvasCtrlClicked += OnCanvasCtrlClicked;
