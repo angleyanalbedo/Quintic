@@ -188,10 +188,44 @@ namespace Quintic.Wpf.ViewModels
 
         private PlotModel CreateTorqueSpeedModel()
         {
-            var model = new PlotModel { Title = "Torque vs Speed (T-N Curve)" };
+            var plotBackground = OxyColor.Parse("#111111");
+            var textColor = OxyColor.Parse("#DDDDDD");
+            var gridColor = OxyColor.Parse("#222222");
+            var tickColor = OxyColor.Parse("#444444");
+
+            var model = new PlotModel 
+            { 
+                Title = "Torque vs Speed (T-N Curve)",
+                PlotAreaBorderThickness = new OxyThickness(0),
+                Background = OxyColors.Transparent,
+                TextColor = textColor,
+                TitleColor = textColor
+            };
             
-            model.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Title = "Velocity", Unit = "units/s" });
-            model.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "Torque", Unit = "Nm" });
+            model.Axes.Add(new LinearAxis 
+            { 
+                Position = AxisPosition.Bottom, 
+                Title = "Velocity (units/s)", 
+                MajorGridlineStyle = LineStyle.Solid,
+                MajorGridlineColor = gridColor,
+                TickStyle = TickStyle.None,
+                AxislineStyle = LineStyle.Solid,
+                AxislineColor = tickColor,
+                TextColor = textColor,
+                TitleColor = textColor
+            });
+
+            model.Axes.Add(new LinearAxis 
+            { 
+                Position = AxisPosition.Left, 
+                Title = "Torque (Nm)", 
+                MajorGridlineStyle = LineStyle.Solid,
+                MajorGridlineColor = gridColor,
+                TickStyle = TickStyle.None,
+                AxislineStyle = LineStyle.None,
+                TextColor = textColor,
+                TitleColor = textColor
+            });
 
             if (_lastResponse == null || _config == null) return model;
 
@@ -201,8 +235,11 @@ namespace Quintic.Wpf.ViewModels
                 var s1Area = new RectangleAnnotation
                 {
                     MinimumY = -RatedTorque, MaximumY = RatedTorque,
-                    Fill = OxyColor.FromAColor(30, OxyColors.Green),
-                    Text = "S1 (Continuous)"
+                    Fill = OxyColor.Parse("#1A2ECC71"), // 10% opacity Green
+                    Stroke = OxyColor.Parse("#402ECC71"),
+                    StrokeThickness = 1,
+                    Text = "S1 (Continuous)",
+                    TextColor = OxyColor.Parse("#802ECC71")
                 };
                 model.Annotations.Add(s1Area);
             }
@@ -213,15 +250,20 @@ namespace Quintic.Wpf.ViewModels
                 var s3AreaTop = new RectangleAnnotation
                 {
                     MinimumY = RatedTorque, MaximumY = MaxTorque,
-                    Fill = OxyColor.FromAColor(30, OxyColors.Orange),
-                    Text = "S3"
+                    Fill = OxyColor.Parse("#1AE67E22"), // 10% opacity Orange
+                    Stroke = OxyColor.Parse("#40E67E22"),
+                    StrokeThickness = 1,
+                    Text = "S3",
+                    TextColor = OxyColor.Parse("#80E67E22")
                 };
                 model.Annotations.Add(s3AreaTop);
 
                 var s3AreaBottom = new RectangleAnnotation
                 {
                     MinimumY = -MaxTorque, MaximumY = -RatedTorque,
-                    Fill = OxyColor.FromAColor(30, OxyColors.Orange)
+                    Fill = OxyColor.Parse("#1AE67E22"),
+                    Stroke = OxyColor.Parse("#40E67E22"),
+                    StrokeThickness = 1
                 };
                 model.Annotations.Add(s3AreaBottom);
             }
@@ -229,8 +271,9 @@ namespace Quintic.Wpf.ViewModels
             var scatterSeries = new ScatterSeries 
             { 
                 MarkerType = MarkerType.Circle, 
-                MarkerSize = 2, 
-                MarkerFill = OxyColors.Blue,
+                MarkerSize = 2.5, 
+                MarkerFill = OxyColor.Parse("#3498DB"), // Modern blue
+                MarkerStroke = OxyColors.Transparent,
                 Title = "Operation Points"
             };
 
