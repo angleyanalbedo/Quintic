@@ -95,10 +95,10 @@ This document outlines the architectural evolution of the Quintic Cam Editor, fr
 - **Health View:** ✅ RMS Thermal Load Bar & Peak Torque Gauge implemented with color-coded warnings.
 - **Diagnostics Log:** ✅ Auto-detect mechanical resonance risks (High Jerk) and drive capacity issues.
 
-#### Phase 3: Advanced Plotting & Simulation (In Progress)
+#### Phase 3: Advanced Plotting & Simulation (Completed)
 - **T-N Curve Overlays:** ✅ Scatter plot of Torque vs. Speed with S1 (Continuous) and S3 (Intermittent) operation boundaries implemented.
-- **Dynamic Toggles:** Checkboxes for Torque, Power, and Regenerative Energy curves.
-- **Sync Cursor:** Crosshair showing instantaneous Torque/Power on the position curve.
+- **Dynamic Toggles:** ✅ Checkboxes for Torque, Power, and Regenerative Energy curves.
+- **Sync Cursor:** ✅ Crosshair showing instantaneous Torque/Power on the position curve.
 
 #### Phase 4: Automated Reporting
 - **PDF Generation:** One-click export of "Crash Prevention" reports with KPI summaries, danger zone screenshots, and sizing recommendations.

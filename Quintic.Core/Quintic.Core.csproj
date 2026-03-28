@@ -23,6 +23,18 @@
     <PackageProjectUrl>https://github.com/angleyanalbedo/Quintic</PackageProjectUrl>
     <PackageReleaseNotes># Release Notes
 
+## v0.7.0 - Kinematic Analysis &amp; Visualization
+**Date:** 2026-03-28
+
+### 🚀 New Features
+- **Dynamic Physics Overlays**: Added toggleable Torque, Power, and Regenerative Energy curves to the main motion plot.
+- **Sync Cursors**: Implemented crosshair synchronization across Displacement and V/A/J plots, displaying precise instantaneous physical parameters (Nm, W, °).
+- **T-N Curve Overlays**: Added continuous (S1) and intermittent (S3) boundaries to the Torque vs. Speed scatter plot.
+
+### 🎨 UI/UX Improvements
+- **Modernized Analysis Window**: Redesigned the Kinematic Analysis window to fully align with the core Dark Theme (removed white borders, modernized charts, updated typography and accent colors).
+- **HUD Enhancements**: Context menu toggles now dynamically show/hide their corresponding legends in the Heads-Up Display.
+
 ## v0.6.0 - Integration &amp; Logic Tracks
 **Date:** 2026-03-27
 
