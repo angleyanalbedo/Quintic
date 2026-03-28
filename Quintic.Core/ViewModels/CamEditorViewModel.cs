@@ -60,6 +60,7 @@ namespace Quintic.Wpf.ViewModels
         public ICommand OpenProjectCommand { get; private set; }
         public ICommand ExportCsvCommand { get; private set; }
         public ICommand ExportStCommand { get; private set; }
+        public ICommand ExportPdfCommand { get; private set; }
         public ICommand ShowAnalysisCommand { get; private set; }
         public ICommand UndoCommand { get; private set; }
         public ICommand RedoCommand { get; private set; }
@@ -94,11 +95,12 @@ namespace Quintic.Wpf.ViewModels
             OpenProjectCommand = new RelayCommand(ExecuteOpenProject);
             ExportCsvCommand = new RelayCommand(ExecuteExportCsv);
             ExportStCommand = new RelayCommand(ExecuteExportSt);
+            ExportPdfCommand = new RelayCommand(ExecuteExportPdf);
             ShowAnalysisCommand = new RelayCommand(o => RequestOpenAnalysisWindow?.Invoke());
             UndoCommand = new RelayCommand(ExecuteUndo, o => _historyIndex > 0);
             RedoCommand = new RelayCommand(ExecuteRedo, o => _historyIndex < _history.Count - 1);
             
-            ToolbarVM = new ToolbarViewModel(SaveProjectCommand, OpenProjectCommand, ExportCsvCommand, ExportStCommand, ShowAnalysisCommand, UndoCommand, RedoCommand);
+            ToolbarVM = new ToolbarViewModel(SaveProjectCommand, OpenProjectCommand, ExportCsvCommand, ExportStCommand, ExportPdfCommand, ShowAnalysisCommand, UndoCommand, RedoCommand);
 
             Recalculate();
         }
@@ -279,6 +281,24 @@ namespace Quintic.Wpf.ViewModels
             if (saveFileDialog.ShowDialog() == true)
             {
                 StCodeGenerator.Export(saveFileDialog.FileName, _lastCalculation);
+            }
+        }
+
+        private void ExecuteExportPdf(object obj)
+        {
+            if (_lastCalculation == null || _lastCalculation.Points.Count == 0) return;
+
+            var saveFileDialog = new SaveFileDialog
+            {
+                Filter = "PDF Document (*.pdf)|*.pdf",
+                DefaultExt = ".pdf",
+                FileName = "KinematicReport.pdf"
+            };
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                PdfReportService.GenerateReport(saveFileDialog.FileName, AnalysisVM, CamPlotVM);
+                System.Windows.MessageBox.Show("PDF Report generated successfully.", "Export Success", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
             }
         }
 

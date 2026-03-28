@@ -60,6 +60,8 @@
                     <MenuItem Header="Export">
                         <MenuItem Header="To CSV..." Command="{Binding ExportCsvCommand}"/>
                         <MenuItem Header="To Structured Text (ST)..." Command="{Binding ExportStCommand}"/>
+                        <Separator/>
+                        <MenuItem Header="Kinematic Report (PDF)..." Command="{Binding ExportPdfCommand}"/>
                     </MenuItem>
                     <MenuItem Header="Tools">
                         <MenuItem Header="Kinematic Analysis..." Command="{Binding ShowAnalysisCommand}"/>
