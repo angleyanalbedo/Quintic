@@ -103,6 +103,12 @@ This document outlines the architectural evolution of the Quintic Cam Editor, fr
 #### Phase 4: Automated Reporting (Completed)
 - **PDF Generation:** ✅ One-click export of "Crash Prevention" reports with KPI summaries, danger zone screenshots, and sizing recommendations.
 
+### 5.4 Next-Generation Math Engine (In Progress)
+**Goal:** Implement a more robust and advanced mathematical engine for complex motion profiles.
+- **NURBS (Non-Uniform Rational B-Splines):** Support for highly complex, smooth curve generation and local control.
+- **Global Optimization Algorithms:** Automatically minimize peak jerk and acceleration across the entire cam profile.
+- **Multi-Axis Interpolation:** Extend the math engine to support 3D/Spatial cam profiles and complex robotic kinematics.
+
 ---
 
 ## 🔮 Phase 6: Application Intelligence
