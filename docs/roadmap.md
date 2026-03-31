@@ -72,38 +72,33 @@ This document outlines the architectural evolution of the Quintic Cam Editor, fr
 
 ---
 
-## 🔮 Phase 5: Advanced Math (Future)
+## 🔮 Phase 5: Advanced Math (In Progress)
 **Goal:** Match the interpolation capabilities of mature commercial tools (Siemens/Rexroth).
 
-### 5.1 Boundary Value Solver (Automatic Continuity) ✅
-- **Problem:** Currently, users must manually ensure $V_{end}$ of Segment A matches $V_{start}$ of Segment B.
-- **Solution:** Implemented forward propagation of $V$ and $A$ boundary conditions in `CamCalculator`.
+### 5.1 Global Boundary Value Solver (C2/C3 Continuity) ✅
+- **Problem:** Previously, users had to manually ensure boundary matching, and laws were restricted to "Rest-in-Rest".
+- **Solution:** Implemented a Two-Pass Global BVP Solver with Forward/Backward Sweep.
+- **Outcome:** Automatically propagates Velocity ($V$), Acceleration ($A$), and Jerk ($J$) across segments. Upgraded `Polynomial7` to dynamically solve 8x8 matrices for true $C^3$ (Jerk) continuity.
 
-### 5.2 Spline Interpolation ✅
-- **Solution:** Implement **B-Splines (Cubic/Quintic)** for smooth curve fitting through point clouds.
-- **Status:** Completed (`BSpline`).
+### 5.2 Advanced Spline Interpolation ✅
+- **Solution:** Upgraded from Cubic to **Quintic Hermite B-Splines**.
+- **Outcome:** Achieved $C^2$ (Acceleration) continuity for point-cloud fitting, eliminating mechanical shocks present in lower-order splines.
 
-### 5.3 Kinematic Analysis Dashboard (In Progress)
+### 5.3 Adaptive Sampling Engine ✅
+- **Problem:** Fixed-resolution sampling wastes points on Dwell segments and loses precision on high-curvature segments.
+- **Solution:** Implemented dynamic subdivision based on curvature (acceleration delta).
+- **Outcome:** Generates high-density points only where needed, drastically improving CSV export precision without bloating file size.
+
+### 5.4 Kinematic Analysis Dashboard (Completed)
 **Goal:** Quantified "Crash Prevention" report, benchmarking Siemens SIZER or Beckhoff TC3 Motion Designer.
+- **Multi-Inertia Modeling:** Basic inertia summation ($J_{total}$) implemented.
+- **Friction Models:** Coulomb friction ($T_c$) support added.
+- **Key Metrics:** RMS Acceleration, Peak Jerk, Peak Torque, and Power Prediction.
+- **Visual KPI Cards:** RMS Thermal Load Bar & Peak Torque Gauge with color-coded warnings.
+- **T-N Curve Overlays:** Scatter plot of Torque vs. Speed with S1/S3 operation boundaries.
+- **Automated Reporting:** One-click PDF export of "Crash Prevention" reports.
 
-#### Phase 1: Physics Engine & Core Math (Partially Completed)
-- **Multi-Inertia Modeling:** ✅ Basic inertia summation ($J_{total}$) implemented.
-- **Friction Models:** ✅ Coulomb friction ($T_c$) support added.
-- **Key Metrics:** ✅ RMS Acceleration, Peak Jerk, Peak Torque, and Power Prediction implemented in `KinematicAnalysisViewModel`.
-
-#### Phase 2: Visual KPI Cards & Real-time Alerts (Completed)
-- **Health View:** ✅ RMS Thermal Load Bar & Peak Torque Gauge implemented with color-coded warnings.
-- **Diagnostics Log:** ✅ Auto-detect mechanical resonance risks (High Jerk) and drive capacity issues.
-
-#### Phase 3: Advanced Plotting & Simulation (Completed)
-- **T-N Curve Overlays:** ✅ Scatter plot of Torque vs. Speed with S1 (Continuous) and S3 (Intermittent) operation boundaries implemented.
-- **Dynamic Toggles:** ✅ Checkboxes for Torque, Power, and Regenerative Energy curves.
-- **Sync Cursor:** ✅ Crosshair showing instantaneous Torque/Power on the position curve.
-
-#### Phase 4: Automated Reporting (Completed)
-- **PDF Generation:** ✅ One-click export of "Crash Prevention" reports with KPI summaries, danger zone screenshots, and sizing recommendations.
-
-### 5.4 Next-Generation Math Engine (In Progress)
+### 5.5 Next-Generation Math Engine (Future)
 **Goal:** Implement a more robust and advanced mathematical engine for complex motion profiles.
 - **NURBS (Non-Uniform Rational B-Splines):** Support for highly complex, smooth curve generation and local control.
 - **Global Optimization Algorithms:** Automatically minimize peak jerk and acceleration across the entire cam profile.
