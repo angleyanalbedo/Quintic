@@ -68,7 +68,7 @@ namespace Quintic.Wpf.Core.Services
                 currentSlave = slaveEnd;
             }
 
-            // Pass 2: Global Boundary Value Solver (Forward & Backward Sweep for C2 Continuity)
+            // Pass 2: Global Boundary Value Solver (Forward & Backward Sweep for C3 Continuity)
             // Initialize boundaries
             for (int i = 0; i < resolvedSegments.Count; i++)
             {
@@ -81,18 +81,21 @@ namespace Quintic.Wpf.Core.Services
                 {
                     seg.StartVelocity = 0; seg.EndVelocity = 0;
                     seg.StartAcceleration = 0; seg.EndAcceleration = 0;
+                    seg.StartJerk = 0; seg.EndJerk = 0;
                 }
                 else if (seg.MotionLaw == MotionLawType.ConstantVelocity)
                 {
                     double v = Math.Abs(duration) > 1e-9 ? height / duration : 0;
                     seg.StartVelocity = v; seg.EndVelocity = v;
                     seg.StartAcceleration = 0; seg.EndAcceleration = 0;
+                    seg.StartJerk = 0; seg.EndJerk = 0;
                 }
             }
 
-            // Forward Sweep: Propagate V and A
+            // Forward Sweep: Propagate V, A, and J
             double currentV = 0.0;
             double currentA = 0.0;
+            double currentJ = 0.0;
             for (int i = 0; i < resolvedSegments.Count; i++)
             {
                 var seg = resolvedSegments[i];
@@ -102,28 +105,33 @@ namespace Quintic.Wpf.Core.Services
                 {
                     seg.StartVelocity = currentV;
                     seg.StartAcceleration = currentA;
+                    seg.StartJerk = currentJ;
                 }
                 else
                 {
                     currentV = seg.StartVelocity;
                     currentA = seg.StartAcceleration;
+                    currentJ = seg.StartJerk;
                 }
 
                 // Estimate End Conditions for flexible laws
-                if (seg.MotionLaw == MotionLawType.Polynomial5 || seg.MotionLaw == MotionLawType.BSpline)
+                if (seg.MotionLaw == MotionLawType.Polynomial5 || seg.MotionLaw == MotionLawType.Polynomial7 || seg.MotionLaw == MotionLawType.BSpline)
                 {
                     // Use user defined or keep current
                     currentV = seg.EndVelocity;
                     currentA = seg.EndAcceleration;
+                    currentJ = seg.EndJerk;
                 }
                 else if (seg.MotionLaw != MotionLawType.Dwell && seg.MotionLaw != MotionLawType.ConstantVelocity)
                 {
-                    // For other laws, we aim for C2 continuity by leaving them open for the backward sweep,
+                    // For other laws, we aim for C3 continuity by leaving them open for the backward sweep,
                     // but default to 0 if it's the last segment.
                     currentV = 0;
                     currentA = 0;
+                    currentJ = 0;
                     seg.EndVelocity = currentV;
                     seg.EndAcceleration = currentA;
+                    seg.EndJerk = currentJ;
                 }
             }
 
@@ -136,6 +144,7 @@ namespace Quintic.Wpf.Core.Services
                 // Force end conditions of current segment to match start conditions of next segment
                 currentSeg.EndVelocity = nextSeg.StartVelocity;
                 currentSeg.EndAcceleration = nextSeg.StartAcceleration;
+                currentSeg.EndJerk = nextSeg.StartJerk;
             }
 
             return resolvedSegments;
@@ -182,14 +191,20 @@ namespace Quintic.Wpf.Core.Services
                         kernel = new Gutman(mStart, mEnd, sStart, sEnd);
                         break;
                     case MotionLawType.BSpline:
-                        kernel = new BSpline(mStart, mEnd, sStart, sEnd, segment.StartVelocity, segment.EndVelocity, segment.ControlPoints);
+                        kernel = new BSpline(mStart, mEnd, sStart, sEnd, 
+                                             segment.StartVelocity, segment.EndVelocity, 
+                                             segment.StartAcceleration, segment.EndAcceleration, 
+                                             segment.ControlPoints);
                         break;
                     case MotionLawType.ModifiedSine:
                     case MotionLawType.ModifiedTrapezoid:
                         kernel = new ModifiedTrapezoid(mStart, mEnd, sStart, sEnd);
                         break;
                     case MotionLawType.Polynomial7:
-                        kernel = new Polynomial7(mStart, mEnd, sStart, sEnd);
+                        kernel = new Polynomial7(mStart, mEnd, sStart, sEnd, 
+                                                 segment.StartVelocity, segment.EndVelocity, 
+                                                 segment.StartAcceleration, segment.EndAcceleration,
+                                                 segment.StartJerk, segment.EndJerk);
                         break;
                     case MotionLawType.ConstantVelocity:
                         kernel = new ConstantVelocity(mStart, mEnd, sStart, sEnd);
