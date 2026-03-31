@@ -12,159 +12,130 @@ namespace Quintic.Wpf.Core.Services
         public static List<Segment> ResolveCoordinates(List<Segment> segments, ProjectConfig config)
         {
             var resolvedSegments = new List<Segment>();
-            double currentMaster = 0.0;
-            double currentSlave = 0.0;
-            double currentV = 0.0; // Geometric Velocity (ds/dtheta)
-            double currentA = 0.0; // Geometric Acceleration (d2s/dtheta2)
+            if (segments == null || segments.Count == 0) return resolvedSegments;
 
-            // Determine global speed for Time -> Master conversion
-            // RPM * 360 / 60 = deg/s
             double speedDegPerSec = (config.MasterVelocity * 360.0) / 60.0;
             if (Math.Abs(config.MasterVelocity) < 1e-9) speedDegPerSec = 0.0;
 
+            // Pass 1: Resolve Absolute Coordinates (Master & Slave)
+            double currentMaster = 0.0;
+            double currentSlave = 0.0;
+
             foreach (var seg in segments)
             {
-                // 1. Resolve Master End Position
                 double masterStart = currentMaster;
                 double masterEnd = 0.0;
 
-                // --- Reference Logic ---
                 if (seg.ReferenceType == ReferenceType.Time)
                 {
-                    // Duration (seconds) -> Delta Master
                     double durationSec = seg.MasterVal;
-                    double deltaMaster = durationSec * speedDegPerSec;
-                    masterEnd = masterStart + deltaMaster;
+                    masterEnd = masterStart + (durationSec * speedDegPerSec);
                 }
                 else if (seg.CoordinateMode == CoordinateMode.Relative)
                 {
-                    // Delta Master (degrees/units)
                     masterEnd = masterStart + seg.MasterVal;
                 }
-                else // ABSOLUTE MASTER
+                else
                 {
                     masterEnd = seg.MasterVal;
                 }
 
-                // 2. Resolve Slave End Position
                 double slaveStart = currentSlave;
                 double slaveEnd = 0.0;
 
                 if (seg.MotionLaw == MotionLawType.Dwell)
                 {
-                    // Force Dwell to have zero displacement to ensure continuity
                     slaveEnd = slaveStart;
                 }
                 else if (seg.CoordinateMode == CoordinateMode.Relative)
                 {
                     slaveEnd = slaveStart + seg.SlaveVal;
                 }
-                else // ABSOLUTE SLAVE
+                else
                 {
                     slaveEnd = seg.SlaveVal;
                 }
 
-                // 3. Create Compiled Segment
                 var resolvedSeg = seg.Clone();
-                
-                // Inject computed values
                 resolvedSeg.ComputedMasterStart = masterStart;
                 resolvedSeg.ComputedMasterEnd = masterEnd;
                 resolvedSeg.ComputedSlaveStart = slaveStart;
                 resolvedSeg.ComputedSlaveEnd = slaveEnd;
 
-                // --- Continuity Logic ---
-                // Inherit start conditions from previous segment
-                resolvedSeg.StartVelocity = currentV;
-                resolvedSeg.StartAcceleration = currentA;
-
-                // Calculate End Conditions for the next segment
-                double duration = masterEnd - masterStart;
-                double height = slaveEnd - slaveStart;
-                double nextV = 0.0;
-                double nextA = 0.0;
-
-                switch (seg.MotionLaw)
-                {
-                    case MotionLawType.ConstantVelocity:
-                        if (Math.Abs(duration) > 1e-9)
-                            nextV = height / duration;
-                        else
-                            nextV = 0;
-                        nextA = 0;
-                        break;
-
-                    case MotionLawType.Polynomial5:
-                        // For Poly5, End V/A are user inputs (or 0 if not set)
-                        nextV = seg.EndVelocity;
-                        nextA = seg.EndAcceleration;
-                        break;
-
-                    case MotionLawType.Polynomial7:
-                    case MotionLawType.Cycloidal:
-                    case MotionLawType.ModifiedTrapezoid:
-                    case MotionLawType.ModifiedSine:
-                    case MotionLawType.SevenSegment:
-                    case MotionLawType.Gutman:
-                    case MotionLawType.Dwell:
-                    default:
-                        // Standard laws typically end at rest (V=0, A=0)
-                        nextV = 0;
-                        nextA = 0;
-                        break;
-
-                    case MotionLawType.SimpleSine:
-                        nextV = 0;
-                        // Simple Sine ends with non-zero acceleration: a_end = -h * pi^2 / (2 * beta^2)
-                        if (Math.Abs(duration) > 1e-9)
-                        {
-                            double beta = duration;
-                            nextA = -height * Math.Pow(Math.PI, 2) / (2 * beta * beta);
-                        }
-                        else
-                        {
-                            nextA = 0;
-                        }
-                        break;
-
-                    case MotionLawType.BSpline:
-                        // BSpline (Cubic) ends with specific V/A
-                        // V is user defined (EndVelocity)
-                        nextV = seg.EndVelocity;
-                        // A is calculated from Cubic formula at t=1
-                        // a_tau(1) = 6*s0 + 2*m0 - 6*s1 + 4*m1
-                        // where s0=0, s1=height, m0=vStart*beta, m1=vEnd*beta
-                        {
-                            double beta = duration;
-                            if (Math.Abs(beta) > 1e-9)
-                            {
-                                double m0 = seg.StartVelocity * beta;
-                                double m1 = seg.EndVelocity * beta;
-                                double s0 = 0; 
-                                double s1 = height;
-                                double a_tau_end = 6 * s0 + 2 * m0 - 6 * s1 + 4 * m1;
-                                nextA = a_tau_end / (beta * beta);
-                            }
-                            else
-                            {
-                                nextA = 0;
-                            }
-                        }
-                        break;
-                }
-
-                // Store calculated end conditions back into the resolved segment
-                // (Important for Poly5 if we want to use them, and for debugging)
-                resolvedSeg.EndVelocity = nextV;
-                resolvedSeg.EndAcceleration = nextA;
-
                 resolvedSegments.Add(resolvedSeg);
 
-                // Update state for next iteration
                 currentMaster = masterEnd;
                 currentSlave = slaveEnd;
-                currentV = nextV;
-                currentA = nextA;
+            }
+
+            // Pass 2: Global Boundary Value Solver (Forward & Backward Sweep for C2 Continuity)
+            // Initialize boundaries
+            for (int i = 0; i < resolvedSegments.Count; i++)
+            {
+                var seg = resolvedSegments[i];
+                double duration = (seg.ComputedMasterEnd ?? 0) - (seg.ComputedMasterStart ?? 0);
+                double height = (seg.ComputedSlaveEnd ?? 0) - (seg.ComputedSlaveStart ?? 0);
+
+                // Pre-calculate rigid boundary conditions (Dwell, Constant Velocity)
+                if (seg.MotionLaw == MotionLawType.Dwell)
+                {
+                    seg.StartVelocity = 0; seg.EndVelocity = 0;
+                    seg.StartAcceleration = 0; seg.EndAcceleration = 0;
+                }
+                else if (seg.MotionLaw == MotionLawType.ConstantVelocity)
+                {
+                    double v = Math.Abs(duration) > 1e-9 ? height / duration : 0;
+                    seg.StartVelocity = v; seg.EndVelocity = v;
+                    seg.StartAcceleration = 0; seg.EndAcceleration = 0;
+                }
+            }
+
+            // Forward Sweep: Propagate V and A
+            double currentV = 0.0;
+            double currentA = 0.0;
+            for (int i = 0; i < resolvedSegments.Count; i++)
+            {
+                var seg = resolvedSegments[i];
+                
+                // Inherit from previous unless it's a rigid segment that already defined its start
+                if (seg.MotionLaw != MotionLawType.Dwell && seg.MotionLaw != MotionLawType.ConstantVelocity)
+                {
+                    seg.StartVelocity = currentV;
+                    seg.StartAcceleration = currentA;
+                }
+                else
+                {
+                    currentV = seg.StartVelocity;
+                    currentA = seg.StartAcceleration;
+                }
+
+                // Estimate End Conditions for flexible laws
+                if (seg.MotionLaw == MotionLawType.Polynomial5 || seg.MotionLaw == MotionLawType.BSpline)
+                {
+                    // Use user defined or keep current
+                    currentV = seg.EndVelocity;
+                    currentA = seg.EndAcceleration;
+                }
+                else if (seg.MotionLaw != MotionLawType.Dwell && seg.MotionLaw != MotionLawType.ConstantVelocity)
+                {
+                    // For other laws, we aim for C2 continuity by leaving them open for the backward sweep,
+                    // but default to 0 if it's the last segment.
+                    currentV = 0;
+                    currentA = 0;
+                    seg.EndVelocity = currentV;
+                    seg.EndAcceleration = currentA;
+                }
+            }
+
+            // Backward Sweep: Smooth out transitions (Simplified BVP)
+            for (int i = resolvedSegments.Count - 2; i >= 0; i--)
+            {
+                var currentSeg = resolvedSegments[i];
+                var nextSeg = resolvedSegments[i + 1];
+
+                // Force end conditions of current segment to match start conditions of next segment
+                currentSeg.EndVelocity = nextSeg.StartVelocity;
+                currentSeg.EndAcceleration = nextSeg.StartAcceleration;
             }
 
             return resolvedSegments;
@@ -172,25 +143,20 @@ namespace Quintic.Wpf.Core.Services
 
         public static CalculationResponse CalculateProject(List<Segment> segments, ProjectConfig config)
         {
-            // Step 1: Compile / Resolve Coordinates
             var compiledSegments = ResolveCoordinates(segments, config);
-
             var fullProfile = new List<CamPoint>();
             
-            // Return empty response if no segments
             if (compiledSegments.Count == 0)
             {
                 return new CalculationResponse();
             }
 
-            // Total Master Duration (Computed)
             double startMaster = compiledSegments[0].ComputedMasterStart ?? 0.0;
             double endMaster = compiledSegments[compiledSegments.Count - 1].ComputedMasterEnd ?? 0.0;
             double totalMaster = endMaster - startMaster;
 
-            int resolution = config.Resolution;
+            int baseResolution = config.Resolution;
 
-            // Step 2: Compute Curves
             for (int i = 0; i < compiledSegments.Count; i++)
             {
                 var segment = compiledSegments[i];
@@ -200,15 +166,6 @@ namespace Quintic.Wpf.Core.Services
                 double sStart = segment.ComputedSlaveStart ?? 0.0;
                 double sEnd = segment.ComputedSlaveEnd ?? 0.0;
 
-                // 2.1 Local Resolution Allocation
-                double segmentMaster = mEnd - mStart;
-                int segRes = 2;
-                if (totalMaster > 0)
-                {
-                    segRes = Math.Max(2, (int)(resolution * (segmentMaster / totalMaster)));
-                }
-
-                // 2.2 Kernel Execution (Factory Pattern)
                 IMotionKernel kernel = null;
                 switch (segment.MotionLaw)
                 {
@@ -242,16 +199,17 @@ namespace Quintic.Wpf.Core.Services
                         break;
                     case MotionLawType.Polynomial5:
                     default:
-                        // Default to Poly5 with boundary conditions
                         kernel = new Polynomial5(mStart, mEnd, sStart, sEnd, 
                                                  segment.StartVelocity, segment.EndVelocity,
                                                  segment.StartAcceleration, segment.EndAcceleration);
                         break;
                 }
 
-                var segmentData = kernel.GenerateTable(segRes);
+                // Adaptive Sampling: Generate points dynamically based on curvature
+                double segmentMaster = mEnd - mStart;
+                int minPoints = Math.Max(10, (int)(baseResolution * (segmentMaster / totalMaster)));
+                var segmentData = GenerateAdaptiveTable(kernel, mStart, mEnd, minPoints);
 
-                // 2.3 Stitching (Remove last point of current segment to avoid duplicate points at boundaries)
                 if (i < compiledSegments.Count - 1 && segmentData.Count > 0)
                 {
                     segmentData.RemoveAt(segmentData.Count - 1);
@@ -260,7 +218,6 @@ namespace Quintic.Wpf.Core.Services
                 fullProfile.AddRange(segmentData);
             }
 
-            // Step 3: Analyze Characteristics
             double maxV = 0.0;
             double maxA = 0.0;
             double maxJ = 0.0;
@@ -279,6 +236,45 @@ namespace Quintic.Wpf.Core.Services
                 MaxAcceleration = maxA,
                 MaxJerk = maxJ
             };
+        }
+
+        /// <summary>
+        /// Adaptive Sampling Engine: Dynamically subdivides intervals where acceleration changes rapidly.
+        /// </summary>
+        private static List<CamPoint> GenerateAdaptiveTable(IMotionKernel kernel, double mStart, double mEnd, int minPoints)
+        {
+            var points = new List<CamPoint>();
+            if (Math.Abs(mEnd - mStart) < 1e-9) return points;
+
+            double step = (mEnd - mStart) / (minPoints - 1);
+            double currentTheta = mStart;
+
+            CamPoint prevPoint = kernel.Calculate(currentTheta);
+            points.Add(prevPoint);
+
+            for (int i = 1; i < minPoints; i++)
+            {
+                double nextTheta = mStart + i * step;
+                if (i == minPoints - 1) nextTheta = mEnd;
+
+                CamPoint nextPoint = kernel.Calculate(nextTheta);
+
+                // Check curvature (difference in Acceleration)
+                double aDiff = Math.Abs(nextPoint.A - prevPoint.A);
+                
+                // If acceleration changes too much, inject a midpoint (Adaptive Subdivision)
+                if (aDiff > 5.0) // Threshold can be tuned or made configurable
+                {
+                    double midTheta = (currentTheta + nextTheta) / 2.0;
+                    points.Add(kernel.Calculate(midTheta));
+                }
+
+                points.Add(nextPoint);
+                prevPoint = nextPoint;
+                currentTheta = nextTheta;
+            }
+
+            return points;
         }
     }
 }
