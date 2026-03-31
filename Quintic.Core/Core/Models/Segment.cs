@@ -19,6 +19,8 @@ namespace Quintic.Wpf.Core.Models
         private double _endVelocity;
         private double _startAcceleration;
         private double _endAcceleration;
+        private double _startJerk;
+        private double _endJerk;
 
         // Computed Fields (set by compiler)
         private double? _computedMasterStart;
@@ -109,6 +111,18 @@ namespace Quintic.Wpf.Core.Models
         {
             get => _endAcceleration;
             set { _endAcceleration = value; OnPropertyChanged(); }
+        }
+
+        public double StartJerk
+        {
+            get => _startJerk;
+            set { _startJerk = value; OnPropertyChanged(); }
+        }
+
+        public double EndJerk
+        {
+            get => _endJerk;
+            set { _endJerk = value; OnPropertyChanged(); }
         }
 
         // --- Computed Properties (Read-Only Logic, but settable by Compiler) ---
